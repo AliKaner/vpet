@@ -5,16 +5,22 @@ import { ShopItemCard } from "../components/shop/ShopItemCard";
 
 export function ShopPage() {
   const inventory = useQuery(api.shop.getMyInventory);
+  const decorInventory = useQuery(api.decor.getMyDecorInventory);
   const profile = useQuery(api.users.getMyProfile);
   const pets = useQuery(api.pets.getMyPets);
 
-  if (inventory === undefined || profile === undefined || pets === undefined) {
+  if (inventory === undefined || decorInventory === undefined || profile === undefined || pets === undefined) {
     return <p className="py-10 text-center text-sm text-cocoa-soft">Loading shop...</p>;
   }
 
   const ownedIds = new Set(inventory);
+  // Decor/wallpaper are shared with a partner, so anything either of you bought
+  // counts as owned here (no reason to let it be bought twice).
+  const householdOwnedIds = new Set([...inventory, ...decorInventory]);
   const toys = SHOP_CATALOG.filter((item) => item.kind === "toy");
   const clothing = SHOP_CATALOG.filter((item) => item.kind === "clothing");
+  const decor = SHOP_CATALOG.filter((item) => item.kind === "decor");
+  const wallpaper = SHOP_CATALOG.filter((item) => item.kind === "wallpaper");
 
   return (
     <div className="flex flex-col gap-5 py-4">
@@ -36,6 +42,20 @@ export function ShopPage() {
         <h2 className="text-sm font-bold text-cocoa-soft">Clothing</h2>
         {clothing.map((item) => (
           <ShopItemCard key={item.id} item={item} owned={ownedIds.has(item.id)} coins={profile.coins} pets={pets} />
+        ))}
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-bold text-cocoa-soft">Decor for your Room</h2>
+        {decor.map((item) => (
+          <ShopItemCard key={item.id} item={item} owned={householdOwnedIds.has(item.id)} coins={profile.coins} pets={[]} />
+        ))}
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-bold text-cocoa-soft">Wallpaper</h2>
+        {wallpaper.map((item) => (
+          <ShopItemCard key={item.id} item={item} owned={householdOwnedIds.has(item.id)} coins={profile.coins} pets={[]} />
         ))}
       </section>
     </div>

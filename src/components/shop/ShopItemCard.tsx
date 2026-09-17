@@ -37,6 +37,7 @@ export function ShopItemCard({ item, owned, coins, pets }: ShopItemCardProps) {
   }
 
   async function handleEquipChange(petId: string, checked: boolean) {
+    if (item.kind !== "toy" && item.kind !== "clothing") return;
     setError(null);
     try {
       await equipItem({ petId: petId as Id<"pets">, itemId: checked ? item.id : null, slot: item.kind });
@@ -45,6 +46,7 @@ export function ShopItemCard({ item, owned, coins, pets }: ShopItemCardProps) {
     }
   }
 
+  const isPetEquippable = item.kind === "toy" || item.kind === "clothing";
   const equippedField = item.kind === "toy" ? "equippedToyId" : "equippedClothingId";
 
   return (
@@ -68,7 +70,7 @@ export function ShopItemCard({ item, owned, coins, pets }: ShopItemCardProps) {
         >
           Buy for {"\u{1FA99}"} {item.price}
         </button>
-      ) : pets.length > 0 ? (
+      ) : isPetEquippable && pets.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {pets.map((pet) => {
             const checked = pet[equippedField] === item.id;
@@ -91,7 +93,9 @@ export function ShopItemCard({ item, owned, coins, pets }: ShopItemCardProps) {
           })}
         </div>
       ) : (
-        <p className="text-xs font-bold text-mint-dark">Owned</p>
+        <p className="text-xs font-bold text-mint-dark">
+          {isPetEquippable ? "Owned" : "Owned - place it in your Room"}
+        </p>
       )}
       {error && <p className="text-xs font-semibold text-blossom-dark">{error}</p>}
     </div>

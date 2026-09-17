@@ -122,6 +122,22 @@ export default defineSchema({
     text: v.string(),
     createdAt: v.number(),
   }).index("by_pair", ["pairKey", "createdAt"]),
+
+  // A "room" is shared: keyed by the same pair-key as partnerMessages when paired,
+  // or just your own user id when solo. Either partner can decorate and re-wallpaper
+  // it, and either partner's purchased decor is placeable in it.
+  rooms: defineTable({
+    roomKey: v.string(),
+    wallpaperId: v.optional(v.string()),
+  }).index("by_room", ["roomKey"]),
+
+  roomPlacements: defineTable({
+    roomKey: v.string(),
+    itemId: v.string(), // key into the static SHOP_CATALOG (kind "decor")
+    placedAt: v.number(),
+  })
+    .index("by_room", ["roomKey"])
+    .index("by_room_item", ["roomKey", "itemId"]),
 });
 
 export const DEFAULT_PET_SLOTS = STARTING_PET_SLOTS;
