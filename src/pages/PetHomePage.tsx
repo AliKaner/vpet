@@ -36,7 +36,10 @@ export function PetHomePage({ pet }: { pet: ActivePet }) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-extrabold text-cocoa">{pet.name}</h1>
-          <p className="text-xs text-cocoa-soft">{config.label}</p>
+          <p className="text-xs text-cocoa-soft">
+            {config.label}
+            {pet.generation > 0 && ` · Generation ${pet.generation}`}
+          </p>
         </div>
         <AgeBadge ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} />
       </div>

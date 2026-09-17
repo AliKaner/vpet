@@ -100,7 +100,12 @@ export const getMySlots = query({
 });
 
 export const createPet = mutation({
-  args: { name: v.string(), species: v.string(), appearance: v.optional(appearanceValidator) },
+  args: {
+    name: v.string(),
+    species: v.string(),
+    appearance: v.optional(appearanceValidator),
+    parentMemorialId: v.optional(v.id("memorials")),
+  },
   returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
@@ -127,6 +132,20 @@ export const createPet = mutation({
       throw new ConvexError("You don't have a free pet slot right now.");
     }
 
+    // Dedicating a new pet to one that died of old age continues its lineage: the
+    // new pet is framed as its "child," one generation deeper.
+    let parentPetId: Doc<"pets">["_id"] | undefined;
+    let generation = 0;
+    if (args.parentMemorialId !== undefined) {
+      const memorial = await ctx.db.get(args.parentMemorialId);
+      if (memorial === null || memorial.ownerId !== userId || memorial.cause !== "old_age") {
+        throw new ConvexError("That pet can't be honored as a parent.");
+      }
+      const parentPet = await ctx.db.get(memorial.petId);
+      parentPetId = memorial.petId;
+      generation = (parentPet?.generation ?? 0) + 1;
+    }
+
     const now = Date.now();
     await ctx.db.insert("pets", {
       ownerId: userId,
@@ -143,7 +162,8 @@ export const createPet = mutation({
       lifespanTargetMs: MIN_LIFESPAN_MS,
       careScoreEma: STARTING_CARE_EMA,
       lastCareEvaluation: now,
-      generation: 0,
+      generation,
+      parentPetId,
     });
 
     const progress = await bumpProgress(ctx, userId, { petsCreatedCount: 1 }, args.species);

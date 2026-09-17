@@ -13,6 +13,24 @@ export const getMyMemorials = query({
       .query("memorials")
       .withIndex("by_owner", (q) => q.eq("ownerId", userId))
       .collect();
-    return memorials.sort((a, b) => b.diedAt - a.diedAt);
+
+    // Small per-owner lists, so an in-memory join for lineage info is simpler and
+    // cheap enough rather than adding a dedicated index just for this.
+    const allMyPets = await ctx.db
+      .query("pets")
+      .withIndex("by_owner", (q) => q.eq("ownerId", userId))
+      .collect();
+
+    return memorials
+      .map((memorial) => {
+        const pet = allMyPets.find((p) => p._id === memorial.petId);
+        const child = allMyPets.find((p) => p.parentPetId === memorial.petId);
+        return {
+          ...memorial,
+          generation: pet?.generation ?? 0,
+          continuedByName: child?.name,
+        };
+      })
+      .sort((a, b) => b.diedAt - a.diedAt);
   },
 });

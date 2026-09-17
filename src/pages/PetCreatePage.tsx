@@ -1,7 +1,8 @@
-﻿import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 import { AppearancePicker } from "../components/pet/AppearancePicker";
 import { resolveAppearance, type AppearanceId } from "../../convex/lib/petAppearances";
 import { PetSprite } from "../components/pet/PetSprite";
@@ -9,19 +10,28 @@ import { SPECIES_CONFIG, SPECIES_IDS, type SpeciesId } from "../../convex/lib/sp
 
 export function PetCreatePage() {
   const createPet = useMutation(api.pets.createPet);
+  const memorials = useQuery(api.memorials.getMyMemorials);
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [species, setSpecies] = useState<SpeciesId>(SPECIES_IDS[0]);
   const [appearance, setAppearance] = useState<AppearanceId>("classic");
+  const [parentMemorialId, setParentMemorialId] = useState<Id<"memorials"> | "">("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const eligibleParents = (memorials ?? []).filter((m) => m.cause === "old_age");
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      await createPet({ name, species, appearance: resolveAppearance(species, appearance) });
+      await createPet({
+        name,
+        species,
+        appearance: resolveAppearance(species, appearance),
+        parentMemorialId: parentMemorialId === "" ? undefined : parentMemorialId,
+      });
       navigate("/", { replace: true });
     } catch {
       setError("Couldn't create your pet - give it a name and try again.");
@@ -71,6 +81,25 @@ export function PetCreatePage() {
         </div>
 
         <AppearancePicker species={species} value={resolveAppearance(species, appearance)} onChange={setAppearance} disabled={submitting} />
+
+        {eligibleParents.length > 0 && (
+          <label className="mt-4 flex flex-col gap-1 text-sm font-semibold text-cocoa-soft">
+            In memory of (optional)
+            <select
+              value={parentMemorialId}
+              onChange={(e) => setParentMemorialId(e.target.value as Id<"memorials"> | "")}
+              className="rounded-xl border border-cream-dark bg-white px-3 py-2 text-cocoa outline-none focus:border-peach"
+            >
+              <option value="">A fresh start</option>
+              {eligibleParents.map((memorial) => (
+                <option key={memorial._id} value={memorial._id}>
+                  Child of {memorial.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
         {error && <p className="mt-3 text-sm font-semibold text-blossom-dark">{error}</p>}
         <button
           type="submit"
@@ -83,4 +112,3 @@ export function PetCreatePage() {
     </div>
   );
 }
-

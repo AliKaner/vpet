@@ -9,11 +9,23 @@ interface MemorialCardProps {
   ageAtDeathMs: number;
   cause: "neglect" | "old_age";
   grantedChildSlot: boolean;
+  generation?: number;
+  continuedByName?: string;
 }
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" });
 
-export function MemorialCard({ name, species, bornAt, diedAt, ageAtDeathMs, cause, grantedChildSlot }: MemorialCardProps) {
+export function MemorialCard({
+  name,
+  species,
+  bornAt,
+  diedAt,
+  ageAtDeathMs,
+  cause,
+  grantedChildSlot,
+  generation,
+  continuedByName,
+}: MemorialCardProps) {
   const config = SPECIES_CONFIG[species as SpeciesId] as (typeof SPECIES_CONFIG)[SpeciesId] | undefined;
 
   return (
@@ -23,7 +35,12 @@ export function MemorialCard({ name, species, bornAt, diedAt, ageAtDeathMs, caus
           {config?.emoji ?? "🐾"}
         </span>
         <div className="flex-1">
-          <p className="font-display text-lg font-bold text-cocoa">{name}</p>
+          <p className="font-display text-lg font-bold text-cocoa">
+            {name}
+            {generation !== undefined && generation > 0 && (
+              <span className="ml-1.5 text-xs font-bold text-cocoa-soft">Gen {generation}</span>
+            )}
+          </p>
           <p className="text-xs text-cocoa-soft">
             {dateFormatter.format(bornAt)} - {dateFormatter.format(diedAt)} - lived {formatAge(ageAtDeathMs)}
           </p>
@@ -39,6 +56,11 @@ export function MemorialCard({ name, species, bornAt, diedAt, ageAtDeathMs, caus
         </span>
         {grantedChildSlot && (
           <span className="rounded-full bg-sun/40 px-2 py-1 font-bold text-sun-dark">+1 pet slot earned</span>
+        )}
+        {continuedByName && (
+          <span className="rounded-full bg-peach/30 px-2 py-1 font-bold text-peach-dark">
+            Lineage continues with {continuedByName}
+          </span>
         )}
       </div>
     </div>
