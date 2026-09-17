@@ -36,7 +36,37 @@ export interface WallpaperItem {
   bgColor: string;
 }
 
-export type ShopItem = ToyItem | ClothingItem | DecorItem | WallpaperItem;
+export interface FloorItem {
+  id: string;
+  kind: "floor";
+  label: string;
+  icon: string;
+  price: number;
+  description: string;
+  bgColor: string;
+}
+
+export interface FurnitureItem {
+  id: string;
+  kind: "furniture";
+  label: string;
+  icon: string;
+  price: number;
+  description: string;
+}
+
+export type ShopItem = ToyItem | ClothingItem | DecorItem | WallpaperItem | FloorItem | FurnitureItem;
+
+/** Items that can be freely placed/removed in a room (as opposed to wallpaper/floor,
+ * which are a single active choice). */
+export function isPlaceable(item: ShopItem): item is DecorItem | FurnitureItem {
+  return item.kind === "decor" || item.kind === "furniture";
+}
+
+/** Items that set a single active room style rather than being placed individually. */
+export function isRoomStyle(item: ShopItem): item is WallpaperItem | FloorItem {
+  return item.kind === "wallpaper" || item.kind === "floor";
+}
 
 export const SHOP_CATALOG: ShopItem[] = [
   {
@@ -156,6 +186,73 @@ export const SHOP_CATALOG: ShopItem[] = [
     price: 45,
     description: "Cool and dreamy.",
     bgColor: "#e3e8ff",
+  },
+  {
+    id: "floor_wood",
+    kind: "floor",
+    label: "Polished Wood",
+    icon: "\u{1FAB5}",
+    price: 30,
+    description: "Warm honey-toned floorboards.",
+    bgColor: "#d9a86c",
+  },
+  {
+    id: "floor_tile",
+    kind: "floor",
+    label: "Checkered Tile",
+    icon: "\u{25FB}️",
+    price: 35,
+    description: "Crisp black-and-cream tile.",
+    bgColor: "#e8e2d6",
+  },
+  {
+    id: "floor_carpet",
+    kind: "floor",
+    label: "Plush Carpet",
+    icon: "\u{1F7EB}",
+    price: 35,
+    description: "Soft and cozy underfoot.",
+    bgColor: "#d8c3e8",
+  },
+  {
+    id: "furniture_sofa",
+    kind: "furniture",
+    label: "Sofa",
+    icon: "\u{1F6CB}️",
+    price: 55,
+    description: "Somewhere comfy to sit.",
+  },
+  {
+    id: "furniture_table",
+    kind: "furniture",
+    label: "Coffee Table",
+    icon: "\u{1F6CE}️",
+    price: 30,
+    description: "Perfect for a snack bowl.",
+  },
+  {
+    id: "furniture_bed",
+    kind: "furniture",
+    label: "Pet Bed",
+    icon: "\u{1F6CF}️",
+    price: 45,
+    description: "A soft little bed of their own.",
+  },
+  {
+    id: "furniture_lamp",
+    kind: "furniture",
+    label: "Floor Lamp",
+    icon: "\u{1F4A1}",
+    price: 25,
+    description: "Warm, cozy lighting.",
+  },
+  {
+    id: "furniture_rug",
+    kind: "furniture",
+    label: "Round Rug",
+    icon: "\u{1F7E0}",
+    price: 20,
+    description: "Ties the whole room together.",
   },
 ];
 

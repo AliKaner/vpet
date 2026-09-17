@@ -20,7 +20,9 @@ export function ShopPage() {
   const toys = SHOP_CATALOG.filter((item) => item.kind === "toy");
   const clothing = SHOP_CATALOG.filter((item) => item.kind === "clothing");
   const decor = SHOP_CATALOG.filter((item) => item.kind === "decor");
+  const furniture = SHOP_CATALOG.filter((item) => item.kind === "furniture");
   const wallpaper = SHOP_CATALOG.filter((item) => item.kind === "wallpaper");
+  const floor = SHOP_CATALOG.filter((item) => item.kind === "floor");
 
   return (
     <div className="flex flex-col gap-5 py-4">
@@ -53,8 +55,22 @@ export function ShopPage() {
       </section>
 
       <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-bold text-cocoa-soft">Furniture</h2>
+        {furniture.map((item) => (
+          <ShopItemCard key={item.id} item={item} owned={householdOwnedIds.has(item.id)} coins={profile.coins} pets={[]} />
+        ))}
+      </section>
+
+      <section className="flex flex-col gap-3">
         <h2 className="text-sm font-bold text-cocoa-soft">Wallpaper</h2>
         {wallpaper.map((item) => (
+          <ShopItemCard key={item.id} item={item} owned={householdOwnedIds.has(item.id)} coins={profile.coins} pets={[]} />
+        ))}
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-bold text-cocoa-soft">Flooring</h2>
+        {floor.map((item) => (
           <ShopItemCard key={item.id} item={item} owned={householdOwnedIds.has(item.id)} coins={profile.coins} pets={[]} />
         ))}
       </section>

@@ -94,7 +94,11 @@ export function ShopItemCard({ item, owned, coins, pets }: ShopItemCardProps) {
         </div>
       ) : (
         <p className="text-xs font-bold text-mint-dark">
-          {isPetEquippable ? "Owned" : "Owned - place it in your Room"}
+          {isPetEquippable
+            ? "Owned"
+            : item.kind === "wallpaper" || item.kind === "floor"
+              ? "Owned - choose it in your Room"
+              : "Owned - place it in your Room"}
         </p>
       )}
       {error && <p className="text-xs font-semibold text-blossom-dark">{error}</p>}

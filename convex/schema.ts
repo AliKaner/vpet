@@ -129,11 +129,12 @@ export default defineSchema({
   rooms: defineTable({
     roomKey: v.string(),
     wallpaperId: v.optional(v.string()),
+    floorId: v.optional(v.string()),
   }).index("by_room", ["roomKey"]),
 
   roomPlacements: defineTable({
     roomKey: v.string(),
-    itemId: v.string(), // key into the static SHOP_CATALOG (kind "decor")
+    itemId: v.string(), // key into the static SHOP_CATALOG (kind "decor" or "furniture")
     placedAt: v.number(),
   })
     .index("by_room", ["roomKey"])
