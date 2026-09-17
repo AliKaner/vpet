@@ -187,6 +187,24 @@ export const setAppearance = mutation({
   },
 });
 
+export const renamePet = mutation({
+  args: { petId: v.id("pets"), name: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { petId, name }) => {
+    const userId = await requireUserId(ctx);
+    const pet = await ctx.db.get(petId);
+    if (!pet || pet.ownerId !== userId || pet.status !== "alive") {
+      throw new ConvexError("Pet not found.");
+    }
+    const trimmed = name.trim().slice(0, 24);
+    if (trimmed.length === 0) {
+      throw new ConvexError("Give your pet a name.");
+    }
+    await ctx.db.patch(petId, { name: trimmed });
+    return null;
+  },
+});
+
 export const performCareAction = mutation({
   args: { petId: v.id("pets"), actionId: v.string() },
   handler: async (ctx, { petId, actionId }) => {
