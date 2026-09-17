@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { AppearancePicker } from "../components/pet/AppearancePicker";
-import { resolveAppearance, type AppearanceId } from "../../convex/lib/petAppearances";
+import { PET_APPEARANCES, resolveAppearance, type AppearanceId } from "../../convex/lib/petAppearances";
 import { PetSprite } from "../components/pet/PetSprite";
 import { SPECIES_CONFIG, SPECIES_IDS, type SpeciesId } from "../../convex/lib/species";
 
@@ -12,6 +12,7 @@ export function PetCreatePage() {
   const createPet = useMutation(api.pets.createPet);
   const memorials = useQuery(api.memorials.getMyMemorials);
   const navigate = useNavigate();
+  const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
   const [species, setSpecies] = useState<SpeciesId>(SPECIES_IDS[0]);
   const [appearance, setAppearance] = useState<AppearanceId>("classic");
@@ -20,9 +21,9 @@ export function PetCreatePage() {
   const [submitting, setSubmitting] = useState(false);
 
   const eligibleParents = (memorials ?? []).filter((m) => m.cause === "old_age");
+  const hasColorChoice = PET_APPEARANCES[species].length > 1;
 
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
+  async function finishCreating() {
     setError(null);
     setSubmitting(true);
     try {
@@ -35,9 +36,77 @@ export function PetCreatePage() {
       navigate("/", { replace: true });
     } catch {
       setError("Couldn't create your pet - give it a name and try again.");
-    } finally {
       setSubmitting(false);
     }
+  }
+
+  function handleContinue(event: FormEvent) {
+    event.preventDefault();
+    if (name.trim().length === 0) return;
+    // Nothing to choose on a second screen for this species - just create it.
+    if (!hasColorChoice && eligibleParents.length === 0) {
+      void finishCreating();
+      return;
+    }
+    setStep(2);
+  }
+
+  function handleConfirm(event: FormEvent) {
+    event.preventDefault();
+    void finishCreating();
+  }
+
+  if (step === 2) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-6 py-6">
+        <div className="text-center">
+          <h1 className="font-display text-2xl font-extrabold text-cocoa">Make {name} their own</h1>
+          <p className="mt-1 text-sm text-cocoa-soft">Almost there.</p>
+        </div>
+        <form onSubmit={handleConfirm} className="w-full max-w-sm rounded-cozy bg-white/80 p-6 shadow-md">
+          {hasColorChoice && (
+            <AppearancePicker species={species} value={resolveAppearance(species, appearance)} onChange={setAppearance} disabled={submitting} />
+          )}
+
+          {eligibleParents.length > 0 && (
+            <label className="mt-4 flex flex-col gap-1 text-sm font-semibold text-cocoa-soft">
+              In memory of (optional)
+              <select
+                value={parentMemorialId}
+                onChange={(e) => setParentMemorialId(e.target.value as Id<"memorials"> | "")}
+                className="rounded-xl border border-cream-dark bg-white px-3 py-2 text-cocoa outline-none focus:border-peach"
+              >
+                <option value="">A fresh start</option>
+                {eligibleParents.map((memorial) => (
+                  <option key={memorial._id} value={memorial._id}>
+                    Child of {memorial.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          {error && <p className="mt-3 text-sm font-semibold text-blossom-dark">{error}</p>}
+          <div className="mt-5 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              disabled={submitting}
+              className="rounded-xl border border-cream-dark px-4 py-2 font-bold text-cocoa-soft transition hover:bg-cream-dark disabled:opacity-60"
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 rounded-xl bg-peach px-4 py-2 font-bold text-white shadow-sm transition hover:bg-peach-dark disabled:opacity-60"
+            >
+              Bring them home
+            </button>
+          </div>
+        </form>
+      </div>
+    );
   }
 
   return (
@@ -46,7 +115,7 @@ export function PetCreatePage() {
         <h1 className="font-display text-2xl font-extrabold text-cocoa">Welcome a new pet</h1>
         <p className="mt-1 text-sm text-cocoa-soft">Name it and pick its kind.</p>
       </div>
-      <form onSubmit={handleSubmit} className="w-full max-w-sm rounded-cozy bg-white/80 p-6 shadow-md">
+      <form onSubmit={handleContinue} className="w-full max-w-sm rounded-cozy bg-white/80 p-6 shadow-md">
         <label className="flex flex-col gap-1 text-sm font-semibold text-cocoa-soft">
           Name
           <input
@@ -80,33 +149,13 @@ export function PetCreatePage() {
           })}
         </div>
 
-        <AppearancePicker species={species} value={resolveAppearance(species, appearance)} onChange={setAppearance} disabled={submitting} />
-
-        {eligibleParents.length > 0 && (
-          <label className="mt-4 flex flex-col gap-1 text-sm font-semibold text-cocoa-soft">
-            In memory of (optional)
-            <select
-              value={parentMemorialId}
-              onChange={(e) => setParentMemorialId(e.target.value as Id<"memorials"> | "")}
-              className="rounded-xl border border-cream-dark bg-white px-3 py-2 text-cocoa outline-none focus:border-peach"
-            >
-              <option value="">A fresh start</option>
-              {eligibleParents.map((memorial) => (
-                <option key={memorial._id} value={memorial._id}>
-                  Child of {memorial.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-
         {error && <p className="mt-3 text-sm font-semibold text-blossom-dark">{error}</p>}
         <button
           type="submit"
           disabled={submitting}
           className="mt-5 w-full rounded-xl bg-peach px-4 py-2 font-bold text-white shadow-sm transition hover:bg-peach-dark disabled:opacity-60"
         >
-          Bring them home
+          {submitting ? "Bringing them home..." : "Continue"}
         </button>
       </form>
     </div>
