@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme {
+  --font-body: "Nunito", system-ui, sans-serif;
+  --font-display: "Baloo 2", "Nunito", system-ui, sans-serif;
+
+  --color-cream: #fdf6ec;
+  --color-cream-dark: #f5ead8;
+  --color-cocoa: #5b4638;
+  --color-cocoa-soft: #8a7266;
+
+  --color-peach: #ffb088;
+  --color-peach-dark: #f2905f;
+  --color-mint: #9bd8c0;
+  --color-mint-dark: #6bb99a;
+  --color-sky: #9ecbe8;
+  --color-sky-dark: #6fa9cf;
+  --color-blossom: #f2a6c6;
+  --color-blossom-dark: #e07ea6;
+  --color-sun: #ffd97d;
+  --color-sun-dark: #f2bb4e;
+
+  --color-stat-hunger: #f2a154;
+  --color-stat-clean: #6fb8e8;
+  --color-stat-happy: #ea86b0;
+  --color-stat-health: #6bbf7b;
+
+  --radius-cozy: 1.5rem;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--color-cream);
+  color: var(--color-cocoa);
+  font-family: var(--font-body);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes bounce-idle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes wobble-distress {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-4deg);
+  }
+  75% {
+    transform: rotate(4deg);
+  }
+}
+
+.animate-idle {
+  display: inline-block;
+  animation: bounce-idle 2.4s ease-in-out infinite;
+}
+
+.animate-distress {
+  display: inline-block;
+  animation: wobble-distress 0.5s ease-in-out infinite;
+}
