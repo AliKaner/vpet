@@ -1,28 +1,35 @@
 import { useQuery } from "convex/react";
+import { useState } from "react";
 import { api } from "../../convex/_generated/api";
-import { SHOP_CATALOG } from "../../convex/lib/shopItems";
+import { SHOP_CATALOG, type ShopItem } from "../../convex/lib/shopItems";
 import { ShopItemCard } from "../components/shop/ShopItemCard";
+
+const CATEGORIES: { id: ShopItem["kind"]; label: string }[] = [
+  { id: "toy", label: "Toys" },
+  { id: "clothing", label: "Clothing" },
+  { id: "decor", label: "Decor" },
+  { id: "furniture", label: "Furniture" },
+  { id: "wallpaper", label: "Wallpaper" },
+  { id: "floor", label: "Flooring" },
+];
 
 export function ShopPage() {
   const inventory = useQuery(api.shop.getMyInventory);
   const decorInventory = useQuery(api.decor.getMyDecorInventory);
   const profile = useQuery(api.users.getMyProfile);
   const pets = useQuery(api.pets.getMyPets);
+  const [filter, setFilter] = useState<ShopItem["kind"] | "all">("all");
 
   if (inventory === undefined || decorInventory === undefined || profile === undefined || pets === undefined) {
     return <p className="py-10 text-center text-sm text-cocoa-soft">Loading shop...</p>;
   }
 
   const ownedIds = new Set(inventory);
-  // Decor/wallpaper are shared with a partner, so anything either of you bought
-  // counts as owned here (no reason to let it be bought twice).
+  // Decor/wallpaper/floor/furniture are shared with a partner, so anything either of
+  // you bought counts as owned here (no reason to let it be bought twice).
   const householdOwnedIds = new Set([...inventory, ...decorInventory]);
-  const toys = SHOP_CATALOG.filter((item) => item.kind === "toy");
-  const clothing = SHOP_CATALOG.filter((item) => item.kind === "clothing");
-  const decor = SHOP_CATALOG.filter((item) => item.kind === "decor");
-  const furniture = SHOP_CATALOG.filter((item) => item.kind === "furniture");
-  const wallpaper = SHOP_CATALOG.filter((item) => item.kind === "wallpaper");
-  const floor = SHOP_CATALOG.filter((item) => item.kind === "floor");
+
+  const visibleCategories = filter === "all" ? CATEGORIES : CATEGORIES.filter((c) => c.id === filter);
 
   return (
     <div className="flex flex-col gap-5 py-4">
@@ -33,47 +40,50 @@ export function ShopPage() {
         </span>
       </div>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-bold text-cocoa-soft">Toys</h2>
-        {toys.map((item) => (
-          <ShopItemCard key={item.id} item={item} owned={ownedIds.has(item.id)} coins={profile.coins} pets={pets} />
+      <div className="flex flex-wrap gap-1.5">
+        <button
+          type="button"
+          onClick={() => setFilter("all")}
+          className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+            filter === "all" ? "bg-peach text-white" : "bg-white/70 text-cocoa-soft hover:bg-cream-dark"
+          }`}
+        >
+          All
+        </button>
+        {CATEGORIES.map((category) => (
+          <button
+            key={category.id}
+            type="button"
+            onClick={() => setFilter(category.id)}
+            className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+              filter === category.id ? "bg-peach text-white" : "bg-white/70 text-cocoa-soft hover:bg-cream-dark"
+            }`}
+          >
+            {category.label}
+          </button>
         ))}
-      </section>
+      </div>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-bold text-cocoa-soft">Clothing</h2>
-        {clothing.map((item) => (
-          <ShopItemCard key={item.id} item={item} owned={ownedIds.has(item.id)} coins={profile.coins} pets={pets} />
-        ))}
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-bold text-cocoa-soft">Decor for your Room</h2>
-        {decor.map((item) => (
-          <ShopItemCard key={item.id} item={item} owned={householdOwnedIds.has(item.id)} coins={profile.coins} pets={[]} />
-        ))}
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-bold text-cocoa-soft">Furniture</h2>
-        {furniture.map((item) => (
-          <ShopItemCard key={item.id} item={item} owned={householdOwnedIds.has(item.id)} coins={profile.coins} pets={[]} />
-        ))}
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-bold text-cocoa-soft">Wallpaper</h2>
-        {wallpaper.map((item) => (
-          <ShopItemCard key={item.id} item={item} owned={householdOwnedIds.has(item.id)} coins={profile.coins} pets={[]} />
-        ))}
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-bold text-cocoa-soft">Flooring</h2>
-        {floor.map((item) => (
-          <ShopItemCard key={item.id} item={item} owned={householdOwnedIds.has(item.id)} coins={profile.coins} pets={[]} />
-        ))}
-      </section>
+      {visibleCategories.map((category) => {
+        const items = SHOP_CATALOG.filter((item) => item.kind === category.id);
+        const isPersonal = category.id === "toy" || category.id === "clothing";
+        return (
+          <section key={category.id} className="flex flex-col gap-3">
+            <h2 className="text-sm font-bold text-cocoa-soft">{category.label}</h2>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {items.map((item) => (
+                <ShopItemCard
+                  key={item.id}
+                  item={item}
+                  owned={isPersonal ? ownedIds.has(item.id) : householdOwnedIds.has(item.id)}
+                  coins={profile.coins}
+                  pets={isPersonal ? pets : []}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
