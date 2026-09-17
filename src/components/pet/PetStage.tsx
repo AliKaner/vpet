@@ -1,38 +1,54 @@
+﻿
 import type { MoodBucket } from "../../../convex/lib/petMath";
+import type { AppearanceId } from "../../../convex/lib/petAppearances";
+import type { SpeciesId } from "../../../convex/lib/species";
+import { EMOTION_LABEL, type PetEmotion } from "../../lib/petEmotion";
+import { actionPose, type PetAction } from "../../lib/petPose";
+import { PetSprite } from "./PetSprite";
+
+const MOOD_LABEL = { great: "Feeling great!", content: "Doing okay", distressed: "Needs attention", critical: "In trouble!" };
+const REACTION: Record<SpeciesId, Record<PetAction, string>> = {
+  cat: { feed: "Nom nom… whiskers approved!", pet: "Purrr… don't stop!", clean: "Wet paws, sparkling fur!" },
+  dog: { feed: "Chomp! Best meal ever!", pet: "Tail-wagging happiness!", clean: "Splish, splash… shake!" },
+  bird: { feed: "Peck, peck… delicious!", pet: "Chirp! Happy little feathers!", clean: "A splash and a flutter!" },
+  snake: { feed: "A tasty little mouthful!", pet: "A very happy little coil!", clean: "Squeaky-clean scales!" },
+  mouse: { feed: "Nibble, nibble… yum!", pet: "Tiny paws, big happiness!", clean: "Clean from ears to tail!" },
+  horse: { feed: "Munch, munch… more hay?", pet: "A nuzzle just for you!", clean: "A shiny coat and a happy hoof!" },
+};
+const ACTION_LABEL: Record<string, string> = {
+  walk: "Happy paws, let's go for a walk!", chirp_back: "Chirp chirp! Singing together!",
+  handle: "A gentle hold, a happy little coil!", play: "Wheee! Tiny paws at play!",
+  exercise: "Clip-clop! Stretching those legs!", groom: "A brushed mane and a glossy coat!",
+  clean_litter: "Fresh litter, happy whiskers!", clean_cage: "A fresh little home!", clean_tank: "A sparkling habitat!",
+};
+
+
 
 interface PetStageProps {
-  emoji: string;
+  species: SpeciesId;
+  appearance?: AppearanceId;
   mood: MoodBucket;
+  emotion?: PetEmotion;
+  reaction: { action: string; id: number } | null;
+  onReactionComplete?: () => void;
 }
 
-const MOOD_BACKDROP: Record<MoodBucket, string> = {
-  great: "bg-mint/30",
-  content: "bg-sky/25",
-  distressed: "bg-sun/35",
-  critical: "bg-blossom/35",
-};
+export function PetStage({ species, appearance, mood, emotion = "content", reaction, onReactionComplete }: PetStageProps) {
+  const pose = reaction ? actionPose(reaction.action) : "idle";
 
-const MOOD_LABEL: Record<MoodBucket, string> = {
-  great: "Feeling great!",
-  content: "Doing okay",
-  distressed: "Needs attention",
-  critical: "In trouble!",
-};
 
-export function PetStage({ emoji, mood }: PetStageProps) {
-  const isUneasy = mood === "distressed" || mood === "critical";
+
   return (
-    <div
-      className={`flex flex-col items-center justify-center gap-2 rounded-cozy py-8 transition-colors duration-700 ${MOOD_BACKDROP[mood]}`}
-    >
-      <span
-        role="img"
-        aria-label="Your pet"
-        className={`text-8xl ${isUneasy ? "animate-distress" : "animate-idle"}`}
-      >
-        {emoji}
-      </span>
-      <span className="text-xs font-bold text-cocoa-soft">{MOOD_LABEL[mood]}</span>
+    <div className={`pet-stage pet-mood-${mood} pet-cursor-${pose}`}>
+      <span className="pet-stage-caption">YOUR LITTLE COMPANION</span>
+      <div className="pet-ground" />
+      <div key={`${species}-${appearance}-${reaction?.id ?? "idle"}`} className="pet-actor">
+        <PetSprite species={species} appearance={appearance} pose={pose} emotion={emotion} onComplete={onReactionComplete} />
+      </div>
+      <p role="status" aria-live="polite" className="pet-reaction-label">
+        {reaction ? (ACTION_LABEL[reaction.action] ?? REACTION[species][actionPose(reaction.action)]) : EMOTION_LABEL[emotion] ?? MOOD_LABEL[mood]}
+      </p>
     </div>
   );
 }
+

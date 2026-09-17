@@ -1,0 +1,99 @@
+import { useMutation } from "convex/react";
+import { useState } from "react";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
+import type { ShopItem } from "../../../convex/lib/shopItems";
+
+interface PetOption {
+  _id: Id<"pets">;
+  name: string;
+  equippedToyId?: string;
+  equippedClothingId?: string;
+}
+
+interface ShopItemCardProps {
+  item: ShopItem;
+  owned: boolean;
+  coins: number;
+  pets: PetOption[];
+}
+
+export function ShopItemCard({ item, owned, coins, pets }: ShopItemCardProps) {
+  const buyItem = useMutation(api.shop.buyItem);
+  const equipItem = useMutation(api.shop.equipItem);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function handleBuy() {
+    setBusy(true);
+    setError(null);
+    try {
+      await buyItem({ itemId: item.id });
+    } catch {
+      setError("Couldn't buy that - check your coin balance.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleEquipChange(petId: string, checked: boolean) {
+    setError(null);
+    try {
+      await equipItem({ petId: petId as Id<"pets">, itemId: checked ? item.id : null, slot: item.kind });
+    } catch {
+      setError("Couldn't equip that item.");
+    }
+  }
+
+  const equippedField = item.kind === "toy" ? "equippedToyId" : "equippedClothingId";
+
+  return (
+    <div className="flex flex-col gap-2 rounded-cozy bg-white/70 p-4 shadow-sm">
+      <div className="flex items-center gap-3">
+        <span className="text-3xl" aria-hidden>
+          {item.icon}
+        </span>
+        <div className="flex-1">
+          <p className="font-bold text-cocoa">{item.label}</p>
+          <p className="text-xs text-cocoa-soft">{item.description}</p>
+        </div>
+      </div>
+
+      {!owned ? (
+        <button
+          type="button"
+          onClick={() => void handleBuy()}
+          disabled={busy || coins < item.price}
+          className="self-start rounded-xl bg-peach px-3 py-1.5 text-sm font-bold text-white transition hover:bg-peach-dark disabled:opacity-50"
+        >
+          Buy for {"\u{1FA99}"} {item.price}
+        </button>
+      ) : pets.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {pets.map((pet) => {
+            const checked = pet[equippedField] === item.id;
+            return (
+              <label
+                key={pet._id}
+                className={`flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold transition ${
+                  checked ? "border-peach bg-peach/10 text-peach-dark" : "border-cream-dark text-cocoa-soft"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={checked}
+                  onChange={(e) => void handleEquipChange(pet._id, e.target.checked)}
+                />
+                {pet.name}
+              </label>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="text-xs font-bold text-mint-dark">Owned</p>
+      )}
+      {error && <p className="text-xs font-semibold text-blossom-dark">{error}</p>}
+    </div>
+  );
+}

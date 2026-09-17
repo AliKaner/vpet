@@ -39,3 +39,13 @@ export const CLEAN_COOLDOWN_MS = 45 * MINUTE_MS;
 export const EVAL_INTERVAL_MINUTES = 10;
 
 export const STARTING_PET_SLOTS = 1;
+
+// Currency: the only two reward paths, matching "earn coins through care and milestones."
+export const COIN_PER_CARE_ACTION = 1;
+export const COIN_PER_ACHIEVEMENT = 15;
+
+// Visiting other users' pets.
+export const VISIT_COOLDOWN_MS = 10 * MINUTE_MS;
+export const VISIT_HAPPINESS_GAIN = 10;
+export const VISIT_COIN_REWARD = 3;
+export const MAX_VISITABLE_PETS = 24;

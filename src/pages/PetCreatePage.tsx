@@ -1,7 +1,10 @@
-import { useMutation } from "convex/react";
+﻿import { useMutation } from "convex/react";
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
+import { AppearancePicker } from "../components/pet/AppearancePicker";
+import { resolveAppearance, type AppearanceId } from "../../convex/lib/petAppearances";
+import { PetSprite } from "../components/pet/PetSprite";
 import { SPECIES_CONFIG, SPECIES_IDS, type SpeciesId } from "../../convex/lib/species";
 
 export function PetCreatePage() {
@@ -9,6 +12,7 @@ export function PetCreatePage() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [species, setSpecies] = useState<SpeciesId>(SPECIES_IDS[0]);
+  const [appearance, setAppearance] = useState<AppearanceId>("classic");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -17,7 +21,7 @@ export function PetCreatePage() {
     setError(null);
     setSubmitting(true);
     try {
-      await createPet({ name, species });
+      await createPet({ name, species, appearance: resolveAppearance(species, appearance) });
       navigate("/", { replace: true });
     } catch {
       setError("Couldn't create your pet - give it a name and try again.");
@@ -52,14 +56,13 @@ export function PetCreatePage() {
               <button
                 type="button"
                 key={id}
-                onClick={() => setSpecies(id)}
+                onClick={() => { setSpecies(id); setAppearance("classic"); }}
+                aria-pressed={selected}
                 className={`flex flex-col items-center gap-1 rounded-2xl border-2 p-3 text-center transition ${
                   selected ? "border-peach bg-peach/10" : "border-cream-dark bg-white"
                 }`}
               >
-                <span className="text-4xl" aria-hidden>
-                  {config.emoji}
-                </span>
+                <PetSprite species={id} small />
                 <span className="font-bold text-cocoa">{config.label}</span>
                 <span className="text-[11px] leading-snug text-cocoa-soft">{config.blurb}</span>
               </button>
@@ -67,6 +70,7 @@ export function PetCreatePage() {
           })}
         </div>
 
+        <AppearancePicker species={species} value={resolveAppearance(species, appearance)} onChange={setAppearance} disabled={submitting} />
         {error && <p className="mt-3 text-sm font-semibold text-blossom-dark">{error}</p>}
         <button
           type="submit"
@@ -79,3 +83,4 @@ export function PetCreatePage() {
     </div>
   );
 }
+

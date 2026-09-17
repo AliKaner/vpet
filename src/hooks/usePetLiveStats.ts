@@ -1,4 +1,5 @@
 import { settleStats, type PetVitals } from "../../convex/lib/petMath";
+import { getEquippedEffects } from "../../convex/lib/shopItems";
 import type { SpeciesId } from "../../convex/lib/species";
 import { useNow } from "./useNow";
 
@@ -6,6 +7,7 @@ interface LivePetSnapshot extends PetVitals {
   asOf: number;
   createdAt: number;
   species: string;
+  equippedToyId?: string;
 }
 
 export interface LiveStats extends PetVitals {
@@ -22,6 +24,6 @@ export function usePetLiveStats(pet: LivePetSnapshot | null | undefined): LiveSt
 
   if (!pet) return null;
 
-  const settled = settleStats(pet, pet.asOf, now, pet.species as SpeciesId);
+  const settled = settleStats(pet, pet.asOf, now, pet.species as SpeciesId, getEquippedEffects(pet.equippedToyId));
   return { ...settled, ageMs: now - pet.createdAt };
 }

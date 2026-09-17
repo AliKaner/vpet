@@ -2,6 +2,16 @@ import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { STARTING_PET_SLOTS } from "./lib/constants";
+import { appearanceValidator } from "./lib/petAppearances";
+
+const progressValidator = v.object({
+  petsCreatedCount: v.number(),
+  careActionsCount: v.number(),
+  oldAgeDeathsCount: v.number(),
+  shopPurchasesCount: v.number(),
+  visitsGivenCount: v.number(),
+  speciesRaised: v.array(v.string()),
+});
 
 export default defineSchema({
   ...authTables,
@@ -9,6 +19,9 @@ export default defineSchema({
   users: defineTable({
     ...authTables.users.validator.fields,
     petSlots: v.optional(v.number()), // undefined treated as STARTING_PET_SLOTS
+    coins: v.optional(v.number()), // undefined treated as 0
+    progress: v.optional(progressValidator), // undefined treated as all-zero/empty
+    partnerId: v.optional(v.id("users")), // mutual once paired - raise pets together
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),
@@ -17,6 +30,7 @@ export default defineSchema({
     ownerId: v.id("users"),
     name: v.string(),
     species: v.string(),
+    appearance: v.optional(appearanceValidator),
     status: v.union(v.literal("alive"), v.literal("deceased")),
     createdAt: v.number(),
 
@@ -30,14 +44,18 @@ export default defineSchema({
     careScoreEma: v.number(),
     lastCareEvaluation: v.number(),
 
-    lastFedAt: v.optional(v.number()),
-    lastPettedAt: v.optional(v.number()),
-    lastCleanedAt: v.optional(v.number()),
+    // Keyed by care action id (species-specific action catalog), replacing the
+    // fixed lastFedAt/lastPettedAt/lastCleanedAt fields from Phase 1.
+    actionCooldowns: v.optional(v.record(v.string(), v.number())),
+
+    equippedToyId: v.optional(v.string()),
+    equippedClothingId: v.optional(v.string()),
+    lastVisitedAt: v.optional(v.number()),
 
     deathCause: v.optional(v.union(v.literal("neglect"), v.literal("old_age"))),
     deathAt: v.optional(v.number()),
 
-    // Forward-compat for a later breeding/generations phase; unused by Phase 1 logic.
+    // Forward-compat for a later breeding/generations phase; unused by current logic.
     generation: v.number(),
     parentPetId: v.optional(v.id("pets")),
   })
@@ -57,6 +75,70 @@ export default defineSchema({
     cause: v.union(v.literal("neglect"), v.literal("old_age")),
     grantedChildSlot: v.boolean(),
   }).index("by_owner", ["ownerId"]),
+
+  inventoryItems: defineTable({
+    ownerId: v.id("users"),
+    itemId: v.string(), // key into the static SHOP_CATALOG
+    purchasedAt: v.number(),
+  })
+    .index("by_owner", ["ownerId"])
+    .index("by_owner_item", ["ownerId", "itemId"]),
+
+  achievementUnlocks: defineTable({
+    ownerId: v.id("users"),
+    achievementId: v.string(), // key into the static ACHIEVEMENTS catalog
+    unlockedAt: v.number(),
+  })
+    .index("by_owner", ["ownerId"])
+    .index("by_owner_achievement", ["ownerId", "achievementId"]),
+
+  invites: defineTable({
+    code: v.string(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    usedBy: v.optional(v.id("users")),
+    usedAt: v.optional(v.number()),
+    // "partner" = exclusive 1-on-1 pairing (raise pets + chat together); undefined
+    // is treated as "partner" for invites created before this field existed.
+    // "friend" = non-exclusive, add as many as you like, curated visit list.
+    kind: v.optional(v.union(v.literal("partner"), v.literal("friend"))),
+  })
+    .index("by_code", ["code"])
+    .index("by_creator", ["createdBy"]),
+
+  friendships: defineTable({
+    ownerId: v.id("users"),
+    friendId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_owner", ["ownerId"])
+    .index("by_owner_friend", ["ownerId", "friendId"]),
+
+  partnerMessages: defineTable({
+    // Sorted [userA, userB] ids joined by "_" - the same key regardless of who's
+    // asking, so one index covers a pair's whole conversation.
+    pairKey: v.string(),
+    senderId: v.id("users"),
+    text: v.string(),
+    createdAt: v.number(),
+  }).index("by_pair", ["pairKey", "createdAt"]),
 });
 
 export const DEFAULT_PET_SLOTS = STARTING_PET_SLOTS;
+export type Progress = {
+  petsCreatedCount: number;
+  careActionsCount: number;
+  oldAgeDeathsCount: number;
+  shopPurchasesCount: number;
+  visitsGivenCount: number;
+  speciesRaised: string[];
+};
+
+export const EMPTY_PROGRESS: Progress = {
+  petsCreatedCount: 0,
+  careActionsCount: 0,
+  oldAgeDeathsCount: 0,
+  shopPurchasesCount: 0,
+  visitsGivenCount: 0,
+  speciesRaised: [],
+};

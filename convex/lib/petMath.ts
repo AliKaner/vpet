@@ -41,33 +41,46 @@ export interface SettleResult extends PetVitals {
   hoursElapsed: number;
 }
 
+export type DecayMultipliers = Partial<Record<"hunger" | "cleanliness" | "happiness", number>>;
+
 /**
  * Pure, deterministic projection of a pet's vitals forward from `lastStatsUpdate`
  * to `now`. This is the single source of truth for decay math - the server persists
  * its result on every mutation and cron sweep, and the frontend imports this same
  * function to animate stat bars between syncs (display only, never trusted as state).
+ *
+ * `decayMultipliers` lets an equipped toy slow one stat's decay; every call site
+ * (server and client alike) derives it the same way via shopItems.getEquippedEffects,
+ * so client and server can never disagree about the resulting numbers.
  */
 export function settleStats(
   vitals: PetVitals,
   lastStatsUpdate: number,
   now: number,
   speciesId: SpeciesId,
+  decayMultipliers: DecayMultipliers = {},
 ): SettleResult {
   const hoursElapsed = Math.max(0, now - lastStatsUpdate) / HOUR_MS;
   const species = SPECIES_CONFIG[speciesId];
 
   const hunger = clamp(
-    vitals.hunger - HUNGER_DECAY_PER_HOUR * species.hungerDecayMult * hoursElapsed,
+    vitals.hunger -
+      HUNGER_DECAY_PER_HOUR * species.hungerDecayMult * (decayMultipliers.hunger ?? 1) * hoursElapsed,
     0,
     100,
   );
   const cleanliness = clamp(
-    vitals.cleanliness - CLEANLINESS_DECAY_PER_HOUR * species.cleanlinessDecayMult * hoursElapsed,
+    vitals.cleanliness -
+      CLEANLINESS_DECAY_PER_HOUR *
+        species.cleanlinessDecayMult *
+        (decayMultipliers.cleanliness ?? 1) *
+        hoursElapsed,
     0,
     100,
   );
   const happiness = clamp(
-    vitals.happiness - HAPPINESS_DECAY_PER_HOUR * species.happinessDecayMult * hoursElapsed,
+    vitals.happiness -
+      HAPPINESS_DECAY_PER_HOUR * species.happinessDecayMult * (decayMultipliers.happiness ?? 1) * hoursElapsed,
     0,
     100,
   );

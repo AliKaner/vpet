@@ -2,36 +2,41 @@ import { useMutation } from "convex/react";
 import { useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
-import { CLEAN_COOLDOWN_MS, FEED_COOLDOWN_MS, PET_COOLDOWN_MS } from "../../../convex/lib/constants";
+import { CARE_ACTIONS_BY_SPECIES } from "../../../convex/lib/careActions";
+import type { SpeciesId } from "../../../convex/lib/species";
 import { ActionButton } from "./ActionButton";
 
 interface ActionBarProps {
   petId: Id<"pets">;
-  lastFedAt?: number;
-  lastPettedAt?: number;
-  lastCleanedAt?: number;
+  species: SpeciesId;
+  actionCooldowns: Record<string, number> | undefined;
   now: number;
+  busy?: boolean;
+  onActionStart: () => void;
+  onActionSuccess: (action: string) => void;
 }
-
-type ActionKind = "feed" | "pet" | "clean";
 
 function remainingCooldown(lastAt: number | undefined, cooldownMs: number, now: number): number {
   if (lastAt === undefined) return 0;
   return Math.max(0, lastAt + cooldownMs - now);
 }
 
-export function ActionBar({ petId, lastFedAt, lastPettedAt, lastCleanedAt, now }: ActionBarProps) {
-  const feedPet = useMutation(api.pets.feedPet);
-  const petPet = useMutation(api.pets.petPet);
-  const cleanPet = useMutation(api.pets.cleanPet);
+export function ActionBar({ petId, species, actionCooldowns, now, busy = false, onActionStart, onActionSuccess }: ActionBarProps) {
+  const performCareAction = useMutation(api.pets.performCareAction);
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState<ActionKind | null>(null);
+  const [pending, setPending] = useState<string | null>(null);
 
-  async function run(action: ActionKind, fn: () => Promise<unknown>) {
-    setPending(action);
+  const actions = CARE_ACTIONS_BY_SPECIES[species];
+  const accentClasses = ["bg-peach hover:bg-peach-dark", "bg-blossom hover:bg-blossom-dark", "bg-sky hover:bg-sky-dark"];
+
+  async function run(actionId: string) {
+    if (pending || busy) return;
+    onActionStart();
+    setPending(actionId);
     setError(null);
     try {
-      await fn();
+      await performCareAction({ petId, actionId });
+      onActionSuccess(actionId);
     } catch {
       setError("That didn't work - try again in a moment.");
     } finally {
@@ -42,30 +47,17 @@ export function ActionBar({ petId, lastFedAt, lastPettedAt, lastCleanedAt, now }
   return (
     <div className="flex flex-col gap-2">
       <div className="flex gap-2">
-        <ActionButton
-          label="Feed"
-          icon="🍖"
-          accentClass="bg-peach hover:bg-peach-dark"
-          cooldownRemainingMs={remainingCooldown(lastFedAt, FEED_COOLDOWN_MS, now)}
-          pending={pending === "feed"}
-          onPress={() => void run("feed", () => feedPet({ petId }))}
-        />
-        <ActionButton
-          label="Pet"
-          icon="✋"
-          accentClass="bg-blossom hover:bg-blossom-dark"
-          cooldownRemainingMs={remainingCooldown(lastPettedAt, PET_COOLDOWN_MS, now)}
-          pending={pending === "pet"}
-          onPress={() => void run("pet", () => petPet({ petId }))}
-        />
-        <ActionButton
-          label="Clean"
-          icon="🧼"
-          accentClass="bg-sky hover:bg-sky-dark"
-          cooldownRemainingMs={remainingCooldown(lastCleanedAt, CLEAN_COOLDOWN_MS, now)}
-          pending={pending === "clean"}
-          onPress={() => void run("clean", () => cleanPet({ petId }))}
-        />
+        {actions.map((action, index) => (
+          <ActionButton
+            key={action.id}
+            label={action.label}
+            icon={action.icon}
+            accentClass={accentClasses[index % accentClasses.length]}
+            cooldownRemainingMs={remainingCooldown(actionCooldowns?.[action.id], action.cooldownMs, now)}
+            pending={pending !== null || busy}
+            onPress={() => void run(action.id)}
+          />
+        ))}
       </div>
       {error && <p className="text-center text-xs font-semibold text-blossom-dark">{error}</p>}
     </div>

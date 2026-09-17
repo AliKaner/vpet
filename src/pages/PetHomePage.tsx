@@ -1,4 +1,8 @@
+import { useState } from "react";
+import { petEmotion } from "../lib/petEmotion";
 import type { Doc } from "../../convex/_generated/dataModel";
+import { actionPose } from "../lib/petPose";
+import { playPetSound, unlockPetSound } from "../lib/petSound";
 import { computeMoodBucket } from "../../convex/lib/petMath";
 import { SPECIES_CONFIG, type SpeciesId } from "../../convex/lib/species";
 import { ActionBar } from "../components/pet/ActionBar";
@@ -16,6 +20,16 @@ export function PetHomePage({ pet }: { pet: ActivePet }) {
   const config = SPECIES_CONFIG[pet.species as SpeciesId];
   const vitals = live ?? pet;
   const mood = computeMoodBucket(vitals);
+  const [reaction, setReaction] = useState<{ action: string; id: number; petId: string } | null>(null);
+  const [sound, setSound] = useState(false);
+
+
+  function react(action: string) {
+
+    setReaction({ action, id: Date.now(), petId: pet._id });
+    if (sound && window.matchMedia("(hover: hover) and (pointer: fine)").matches) playPetSound(actionPose(action));
+
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-5">
@@ -27,7 +41,11 @@ export function PetHomePage({ pet }: { pet: ActivePet }) {
         <AgeBadge ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} />
       </div>
 
-      <PetStage emoji={config.emoji} mood={mood} />
+      <PetStage species={config.id} appearance={pet.appearance} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} />
+      <button type="button" className="pet-sound-toggle" aria-pressed={sound}
+        onClick={() => { if (!sound) unlockPetSound(); setSound(!sound); }}>
+        Sound {sound ? "on" : "off"}
+      </button>
 
       <div className="flex flex-col gap-3 rounded-cozy bg-white/70 p-4 shadow-sm">
         <StatBar label="Hunger" value={vitals.hunger} icon="🍖" colorVar="var(--color-stat-hunger)" />
@@ -37,11 +55,14 @@ export function PetHomePage({ pet }: { pet: ActivePet }) {
       </div>
 
       <ActionBar
+        key={pet._id}
+        busy={reaction?.petId === pet._id}
         petId={pet._id}
-        lastFedAt={pet.lastFedAt}
-        lastPettedAt={pet.lastPettedAt}
-        lastCleanedAt={pet.lastCleanedAt}
+        species={config.id}
+        actionCooldowns={pet.actionCooldowns}
         now={now}
+        onActionStart={() => { if (sound) unlockPetSound(); }}
+        onActionSuccess={react}
       />
     </div>
   );
