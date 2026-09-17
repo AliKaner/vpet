@@ -240,21 +240,18 @@ export function RoomPage() {
         <p className="mt-1 text-sm text-cocoa-soft">Decorate your shared space - buy more in the Shop.</p>
       </div>
 
-      <div className="overflow-hidden rounded-cozy border border-cream-dark">
-        <div
-          className="flex min-h-28 flex-wrap items-center justify-center gap-4 p-6 transition-colors duration-500"
-          style={{ backgroundColor: wallColor }}
-        >
+      <div
+        className="overflow-hidden rounded-cozy border border-cream-dark transition-[background] duration-500"
+        style={{ background: `linear-gradient(to bottom, ${wallColor} 0%, ${wallColor} 55%, ${floorColor} 100%)` }}
+      >
+        <div className="flex min-h-28 flex-wrap items-center justify-center gap-4 p-6">
           {placedDecor.length === 0 ? (
             <p className="text-sm text-cocoa-soft">Nothing on the walls yet.</p>
           ) : (
             placedDecor.map((itemId) => <ItemIcon key={itemId} itemId={itemId} music={music} />)
           )}
         </div>
-        <div
-          className="flex min-h-20 flex-wrap items-center justify-center gap-4 border-t border-black/5 p-4 transition-colors duration-500"
-          style={{ backgroundColor: floorColor }}
-        >
+        <div className="flex min-h-20 flex-wrap items-center justify-center gap-4 p-4">
           {placedFurniture.length === 0 ? (
             <p className="text-sm text-cocoa-soft">No furniture yet.</p>
           ) : (

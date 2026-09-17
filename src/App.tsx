@@ -1,9 +1,10 @@
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from "convex/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { api } from "../convex/_generated/api";
 import { AppShell } from "./components/layout/AppShell";
-import { PetSwitcher } from "./components/pet/PetSwitcher";
+import { NewPetTile } from "./components/pet/NewPetTile";
+import { PartnerChat } from "./components/social/PartnerChat";
 import { AchievementsPage } from "./pages/AchievementsPage";
 import { BarberPage } from "./pages/BarberPage";
 import { FriendsPage } from "./pages/FriendsPage";
@@ -17,8 +18,6 @@ import { ShopPage } from "./pages/ShopPage";
 import { SignupPage } from "./pages/SignupPage";
 import { VisitPage } from "./pages/VisitPage";
 
-const SELECTED_PET_KEY = "vpet:selectedPetId";
-
 function SplashScreen() {
   return (
     <div className="flex min-h-svh items-center justify-center bg-cream">
@@ -31,15 +30,9 @@ function SplashScreen() {
 
 function HomeRoute() {
   const pets = useQuery(api.pets.getHouseholdPets);
+  const partnerStatus = useQuery(api.partners.getMyPartnerStatus);
   const navigate = useNavigate();
   const hadPetRef = useRef(false);
-  const [selectedPetId, setSelectedPetId] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem(SELECTED_PET_KEY);
-    } catch {
-      return null;
-    }
-  });
 
   useEffect(() => {
     if (pets && pets.length > 0) hadPetRef.current = true;
@@ -51,15 +44,6 @@ function HomeRoute() {
     }
   }, [pets, navigate]);
 
-  function selectPet(petId: string) {
-    setSelectedPetId(petId);
-    try {
-      localStorage.setItem(SELECTED_PET_KEY, petId);
-    } catch {
-      // per-viewer convenience only; fine to skip if storage is unavailable
-    }
-  }
-
   if (pets === undefined) {
     return <p className="py-10 text-center text-sm text-cocoa-soft">Loading your pets...</p>;
   }
@@ -67,12 +51,28 @@ function HomeRoute() {
     return null;
   }
 
-  const selected = pets.find((pet) => pet._id === selectedPetId) ?? pets[0];
+  const myPetsCount = pets.filter((pet) => pet.isMine).length;
 
   return (
-    <div className="flex flex-1 flex-col gap-4">
-      <PetSwitcher pets={pets} selectedPetId={selected._id} onSelect={selectPet} />
-      <PetHomePage pet={selected} />
+    <div className="flex flex-1 flex-col gap-5">
+      <div className="flex gap-4 overflow-x-auto pb-2">
+        {pets.map((pet) => (
+          <div key={pet._id} className="relative w-72 shrink-0">
+            {!pet.isMine && (
+              <span
+                className="absolute -right-1 -top-1 z-10 rounded-full bg-white px-1.5 py-0.5 text-xs shadow"
+                title="Your partner's pet"
+                aria-hidden
+              >
+                {"\u{1F91D}"}
+              </span>
+            )}
+            <PetHomePage pet={pet} />
+          </div>
+        ))}
+        <NewPetTile myPetsCount={myPetsCount} />
+      </div>
+      {partnerStatus?.paired && <PartnerChat />}
     </div>
   );
 }
