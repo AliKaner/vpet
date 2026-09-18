@@ -46,6 +46,9 @@ export function NavBar() {
           <NavLink to="/barber" className={linkClass}>
             Barber
           </NavLink>
+          <NavLink to="/character" className={linkClass}>
+            Character
+          </NavLink>
           <NavLink to="/achievements" className={linkClass}>
             Achievements
           </NavLink>

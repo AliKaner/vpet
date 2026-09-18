@@ -7,6 +7,7 @@ export function PartnerChat() {
   const sendMessage = useMutation(api.partners.sendMessage);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [open, setOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,7 +28,11 @@ export function PartnerChat() {
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-cozy bg-white/70 p-4 shadow-sm">
+    <aside className={`floating-chat ${open ? "floating-chat-open" : ""}`}>
+      <button type="button" className="floating-chat-toggle" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
+        <span aria-hidden>💬</span><span>{open ? "Close chat" : "Chat"}</span>
+      </button>
+      {open && <div className="floating-chat-panel flex flex-col gap-2 rounded-cozy bg-white p-4 shadow-xl">
       <p className="font-bold text-cocoa">Chat</p>
       <div className="flex max-h-64 min-h-[6rem] flex-col gap-1.5 overflow-y-auto rounded-xl bg-cream-dark/40 p-2">
         {messages === undefined ? (
@@ -64,6 +69,7 @@ export function PartnerChat() {
           Send
         </button>
       </form>
-    </div>
+      </div>}
+    </aside>
   );
 }

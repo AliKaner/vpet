@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { getShopItem } from "../../../convex/lib/shopItems";
+import { CharacterAvatar } from "../character/CharacterAvatar";
 
 const WALLPAPERS: Record<string, string> = {
   wallpaper_stripes: "repeating-linear-gradient(90deg, #fdeee0 0 34px, #f8dfcf 34px 38px)",
@@ -29,6 +30,7 @@ function RoomItem({ itemId }: { itemId: string }) {
 
 export function RoomScene({ children, compact = false }: { children: ReactNode; compact?: boolean }) {
   const room = useQuery(api.decor.getMyRoom);
+  const profile = useQuery(api.users.getMyProfile);
   const wallpaper = room?.wallpaperId;
   const floor = room?.floorId;
   const wallpaperItem = wallpaper ? getShopItem(wallpaper) : undefined;
@@ -42,6 +44,7 @@ export function RoomScene({ children, compact = false }: { children: ReactNode; 
     <div className="room-wall-decor">{wallItems.map((id) => <RoomItem key={id} itemId={id} />)}</div>
     <div className="room-pet-area">{children}</div>
     <div className="room-floor" style={{ background: floorBackground ?? FLOOR.floor_wood }}>
+      {profile?.character && <div className="room-character"><CharacterAvatar character={profile.character} small /><span>You</span></div>}
       {floorItems.map((id) => <RoomItem key={`floor-${id}`} itemId={id} />)}
     </div>
   </section>;

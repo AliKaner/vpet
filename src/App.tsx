@@ -7,6 +7,7 @@ import { NewPetTile } from "./components/pet/NewPetTile";
 import { PartnerChat } from "./components/social/PartnerChat";
 import { AchievementsPage } from "./pages/AchievementsPage";
 import { BarberPage } from "./pages/BarberPage";
+import { CharacterPage } from "./pages/CharacterPage";
 import { FriendsPage } from "./pages/FriendsPage";
 import { GraveyardPage } from "./pages/GraveyardPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -93,6 +94,7 @@ export default function App() {
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/room" element={<Navigate to="/" replace />} />
             <Route path="/barber" element={<BarberPage />} />
+            <Route path="/character" element={<CharacterPage />} />
             <Route path="/achievements" element={<AchievementsPage />} />
             <Route path="/visit" element={<VisitPage />} />
             <Route path="/friends" element={<FriendsPage />} />

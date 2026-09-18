@@ -120,6 +120,11 @@ export const SHOP_CATALOG: ShopItem[] = [
     price: 35,
     description: "A cozy scarf. Purely for show.",
   },
+  { id: "cloth_hoodie", kind: "clothing", label: "Cozy Hoodie", icon: "🧥", price: 45, description: "A soft hoodie for chilly naps." },
+  { id: "cloth_raincoat", kind: "clothing", label: "Raincoat", icon: "🌧️", price: 50, description: "Ready for every puddle." },
+  { id: "cloth_crown", kind: "clothing", label: "Tiny Crown", icon: "👑", price: 75, description: "For the ruler of the room." },
+  { id: "cloth_pajamas", kind: "clothing", label: "Pajamas", icon: "🌙", price: 40, description: "The official bedtime uniform." },
+  { id: "cloth_overalls", kind: "clothing", label: "Overalls", icon: "🧢", price: 55, description: "Ready for a day of play." },
   {
     id: "decor_disco_ball",
     kind: "decor",
@@ -152,6 +157,10 @@ export const SHOP_CATALOG: ShopItem[] = [
     price: 50,
     description: "Plays a little tune when you turn it on.",
   },
+  { id: "decor_plant", kind: "decor", label: "Leafy Plant", icon: "🪴", price: 30, description: "A cheerful corner plant." },
+  { id: "decor_window", kind: "decor", label: "Sunny Window", icon: "🪟", price: 55, description: "A little view of the outside." },
+  { id: "decor_clock", kind: "decor", label: "Cozy Clock", icon: "🕰️", price: 25, description: "Tick-tock, cozy o'clock." },
+  { id: "decor_paw_banner", kind: "decor", label: "Paw Banner", icon: "🎏", price: 35, description: "A banner for your favorite pet." },
   {
     id: "decor_bookshelf",
     kind: "decor",
@@ -187,6 +196,9 @@ export const SHOP_CATALOG: ShopItem[] = [
     description: "Cool and dreamy.",
     bgColor: "#e3e8ff",
   },
+  { id: "wallpaper_garden", kind: "wallpaper", label: "Garden Morning", icon: "🎨", price: 55, description: "Soft leaves and morning light.", bgColor: "#e0f0d9" },
+  { id: "wallpaper_candy", kind: "wallpaper", label: "Candy Clouds", icon: "🎨", price: 55, description: "Playful peach and lavender clouds.", bgColor: "#f5e0ef" },
+  { id: "wallpaper_seaside", kind: "wallpaper", label: "Sea Breeze", icon: "🎨", price: 60, description: "A calm blue room with sunlight.", bgColor: "#d9eef0" },
   {
     id: "floor_wood",
     kind: "floor",
@@ -214,6 +226,8 @@ export const SHOP_CATALOG: ShopItem[] = [
     description: "Soft and cozy underfoot.",
     bgColor: "#d8c3e8",
   },
+  { id: "floor_sunlit", kind: "floor", label: "Sunlit Boards", icon: "🪵", price: 45, description: "Pale boards with warm light.", bgColor: "#edc98e" },
+  { id: "floor_sage", kind: "floor", label: "Sage Mat", icon: "🟩", price: 45, description: "A soft green woven floor.", bgColor: "#b9d2b5" },
   {
     id: "furniture_sofa",
     kind: "furniture",
@@ -254,6 +268,9 @@ export const SHOP_CATALOG: ShopItem[] = [
     price: 20,
     description: "Ties the whole room together.",
   },
+  { id: "furniture_desk", kind: "furniture", label: "Writing Desk", icon: "🪑", price: 50, description: "A tiny desk for big ideas." },
+  { id: "furniture_plant_stand", kind: "furniture", label: "Plant Stand", icon: "🪴", price: 40, description: "A raised spot for greenery." },
+  { id: "furniture_window_seat", kind: "furniture", label: "Window Seat", icon: "🛋️", price: 65, description: "The best nap spot in the room." },
 ];
 
 export function getShopItem(itemId: string): ShopItem | undefined {

@@ -28,6 +28,7 @@ const ACTION_LABEL: Record<string, string> = {
 interface PetStageProps {
   species: SpeciesId;
   appearance?: AppearanceId;
+  clothingId?: string;
   mood: MoodBucket;
   emotion?: PetEmotion;
   reaction: { action: string; id: number } | null;
@@ -36,7 +37,7 @@ interface PetStageProps {
   lifespanTargetMs?: number;
 }
 
-export function PetStage({ species, appearance, mood, emotion = "content", reaction, onReactionComplete, ageMs = 0, lifespanTargetMs = 1 }: PetStageProps) {
+export function PetStage({ species, appearance, clothingId, mood, emotion = "content", reaction, onReactionComplete, ageMs = 0, lifespanTargetMs = 1 }: PetStageProps) {
   const pose = reaction ? actionPose(reaction.action) : "idle";
   const age: PetAgeStage = petAgeStage(ageMs, lifespanTargetMs);
 
@@ -47,7 +48,7 @@ export function PetStage({ species, appearance, mood, emotion = "content", react
       <span className="pet-stage-caption">YOUR LITTLE COMPANION</span>
       <div className="pet-ground" />
       <div key={`${species}-${appearance}-${reaction?.id ?? "idle"}`} className="pet-actor">
-        <PetSprite species={species} appearance={appearance} pose={pose} emotion={emotion} onComplete={onReactionComplete} />
+      <PetSprite species={species} appearance={appearance} clothingId={clothingId} pose={pose} emotion={emotion} onComplete={onReactionComplete} />
       </div>
       <p role="status" aria-live="polite" className="pet-reaction-label">
         {reaction ? (ACTION_LABEL[reaction.action] ?? REACTION[species][actionPose(reaction.action)]) : EMOTION_LABEL[emotion] ?? MOOD_LABEL[mood]}

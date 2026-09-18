@@ -3,6 +3,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { STARTING_PET_SLOTS } from "./lib/constants";
 import { appearanceValidator } from "./lib/petAppearances";
+import { eyeColorValidator, genderValidator, hairColorValidator, hairStyleValidator } from "./lib/character";
 
 const progressValidator = v.object({
   petsCreatedCount: v.number(),
@@ -22,6 +23,11 @@ export default defineSchema({
     coins: v.optional(v.number()), // undefined treated as 0
     progress: v.optional(progressValidator), // undefined treated as all-zero/empty
     partnerId: v.optional(v.id("users")), // mutual once paired - raise pets together
+    characterGender: v.optional(genderValidator),
+    characterHairStyle: v.optional(hairStyleValidator),
+    characterEyeColor: v.optional(eyeColorValidator),
+    characterHairColor: v.optional(hairColorValidator),
+    characterClothingId: v.optional(v.string()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),

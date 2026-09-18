@@ -44,7 +44,7 @@ export function PetHomePage({ pet, embedded = false }: { pet: ActivePet; embedde
         <AgeBadge ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} />
       </div>
 
-      {!embedded ? <RoomScene compact><PetStage species={config.id} appearance={pet.appearance} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} /></RoomScene> : <PetStage species={config.id} appearance={pet.appearance} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} />}
+      {!embedded ? <RoomScene compact><PetStage species={config.id} appearance={pet.appearance} clothingId={pet.equippedClothingId} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} /></RoomScene> : <PetStage species={config.id} appearance={pet.appearance} clothingId={pet.equippedClothingId} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} />}
       <button type="button" className="pet-sound-toggle" aria-pressed={sound}
         onClick={() => { if (!sound) unlockPetSound(); setSound(!sound); }}>
         Sound {sound ? "on" : "off"}
