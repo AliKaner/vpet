@@ -2,7 +2,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
 import { unlockNewAchievements } from "./achievements";
 import { bumpProgress } from "./helpers";
-import { getShopItem } from "./lib/shopItems";
+import { getShopItem, SHOP_CATALOG } from "./lib/shopItems";
 import { mutation, query, type QueryCtx } from "./_generated/server";
 
 async function requireUserId(ctx: QueryCtx) {
@@ -12,6 +12,16 @@ async function requireUserId(ctx: QueryCtx) {
   }
   return userId;
 }
+
+// The item ids this *currently deployed backend* actually recognizes. The
+// frontend's own copy of SHOP_CATALOG can briefly get ahead of a not-yet-redeployed
+// backend (e.g. a static-hosted frontend redeploying before `convex deploy` runs) -
+// this lets the Shop page hide anything the backend can't yet process instead of
+// showing a Buy button that fails.
+export const getSupportedCatalogIds = query({
+  args: {},
+  handler: async () => SHOP_CATALOG.map((item) => item.id),
+});
 
 export const getMyInventory = query({
   args: {},

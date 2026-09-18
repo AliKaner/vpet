@@ -18,12 +18,24 @@ export function ShopPage() {
   const decorInventory = useQuery(api.decor.getMyDecorInventory);
   const profile = useQuery(api.users.getMyProfile);
   const pets = useQuery(api.pets.getMyPets);
+  // The deployed backend's own copy of the catalog - can briefly lag behind the
+  // frontend's if the frontend and Convex backend deploy separately. Filtering
+  // against this means the Shop only ever offers items the backend can actually sell.
+  const supportedIds = useQuery(api.shop.getSupportedCatalogIds);
   const [filter, setFilter] = useState<ShopItem["kind"] | "all">("all");
 
-  if (inventory === undefined || decorInventory === undefined || profile === undefined || pets === undefined) {
+  if (
+    inventory === undefined ||
+    decorInventory === undefined ||
+    profile === undefined ||
+    pets === undefined ||
+    supportedIds === undefined
+  ) {
     return <p className="py-10 text-center text-sm text-cocoa-soft">Loading shop...</p>;
   }
 
+  const supportedIdSet = new Set(supportedIds);
+  const availableCatalog = SHOP_CATALOG.filter((item) => supportedIdSet.has(item.id));
   const ownedIds = new Set(inventory);
   // Decor/wallpaper/floor/furniture are shared with a partner, so anything either of
   // you bought counts as owned here (no reason to let it be bought twice).
@@ -65,7 +77,8 @@ export function ShopPage() {
       </div>
 
       {visibleCategories.map((category) => {
-        const items = SHOP_CATALOG.filter((item) => item.kind === category.id);
+        const items = availableCatalog.filter((item) => item.kind === category.id);
+        if (items.length === 0) return null;
         const isPersonal = category.id === "toy" || category.id === "clothing";
         return (
           <section key={category.id} className="flex flex-col gap-3">

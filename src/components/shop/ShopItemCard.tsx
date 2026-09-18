@@ -1,8 +1,16 @@
 import { useMutation } from "convex/react";
 import { useState } from "react";
+import { ConvexError } from "convex/values";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { ShopItem } from "../../../convex/lib/shopItems";
+
+function errorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ConvexError && typeof error.data === "string") {
+    return error.data;
+  }
+  return fallback;
+}
 
 interface PetOption {
   _id: Id<"pets">;
@@ -29,8 +37,8 @@ export function ShopItemCard({ item, owned, coins, pets }: ShopItemCardProps) {
     setError(null);
     try {
       await buyItem({ itemId: item.id });
-    } catch {
-      setError("Couldn't buy that - check your coin balance.");
+    } catch (err) {
+      setError(errorMessage(err, "Couldn't buy that - check your coin balance."));
     } finally {
       setBusy(false);
     }
@@ -41,8 +49,8 @@ export function ShopItemCard({ item, owned, coins, pets }: ShopItemCardProps) {
     setError(null);
     try {
       await equipItem({ petId: petId as Id<"pets">, itemId: checked ? item.id : null, slot: item.kind });
-    } catch {
-      setError("Couldn't equip that item.");
+    } catch (err) {
+      setError(errorMessage(err, "Couldn't equip that item."));
     }
   }
 
