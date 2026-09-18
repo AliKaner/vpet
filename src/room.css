@@ -14,7 +14,7 @@
 .is-editing .world-furniture:active { cursor:grabbing; }
 .world-furniture.selected,.world-furniture:focus-visible { outline:2px dashed #9c6949; outline-offset:2px; border-radius:12px; }
 .world-pet { position:absolute; width:22%; transform:translate(-50%,-80%); pointer-events:none; }
-.world-pet-name { position:absolute; bottom:0; left:50%; transform:translateX(-50%); font-size:11px; font-weight:800; white-space:nowrap; background:#fff6; padding:0 6px; border-radius:8px; }
+.world-pet-name { position:absolute; bottom:-12px; left:50%; z-index:3; transform:translateX(-50%); font-size:11px; font-weight:800; white-space:nowrap; background:#fff6; padding:0 6px; border-radius:8px; }
 .world-pet .pet-stage,.world-compact-pet .pet-stage { min-height:0; padding:0; border:0; border-radius:0; background:none; overflow:visible; }
 .world-pet .pet-stage-caption,.world-pet .pet-age-label,.world-pet .pet-ground,.world-pet .pet-reaction-label,.world-compact-pet .pet-stage-caption,.world-compact-pet .pet-age-label,.world-compact-pet .pet-ground { display:none; }
 .world-pet .pet-actor,.world-compact-pet .pet-actor { width:100%; margin:0; }

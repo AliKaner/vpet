@@ -62,7 +62,7 @@ function HomeRoute() {
           {pets.map((pet, index) => (
             <div key={pet._id} className="relative room-pet-card">
               {!pet.isMine && <span className="room-partner-badge" title="Your partner's pet" aria-label="Partner's pet">🤝</span>}
-              <PetHomePage pet={pet} embedded roomIndex={index} />
+              <PetHomePage pet={pet} embedded roomIndex={index} roomPetCount={pets.length} />
             </div>
           ))}
         </div>
