@@ -11,10 +11,11 @@ import { PetStage } from "../components/pet/PetStage";
 import { StatBar } from "../components/pet/StatBar";
 import { useNow } from "../hooks/useNow";
 import { usePetLiveStats } from "../hooks/usePetLiveStats";
+import { RoomScene } from "../components/room/RoomScene";
 
 type ActivePet = Doc<"pets"> & { ageMs: number; asOf: number };
 
-export function PetHomePage({ pet }: { pet: ActivePet }) {
+export function PetHomePage({ pet, embedded = false }: { pet: ActivePet; embedded?: boolean }) {
   const live = usePetLiveStats(pet);
   const now = useNow();
   const config = SPECIES_CONFIG[pet.species as SpeciesId];
@@ -31,8 +32,7 @@ export function PetHomePage({ pet }: { pet: ActivePet }) {
 
   }
 
-  return (
-    <div className="flex flex-1 flex-col gap-5">
+  const petContent = <div className={`flex flex-1 flex-col gap-5 ${embedded ? "pet-home-embedded" : ""}`}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-extrabold text-cocoa">{pet.name}</h1>
@@ -44,7 +44,7 @@ export function PetHomePage({ pet }: { pet: ActivePet }) {
         <AgeBadge ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} />
       </div>
 
-      <PetStage species={config.id} appearance={pet.appearance} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} />
+      {!embedded ? <RoomScene compact><PetStage species={config.id} appearance={pet.appearance} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} /></RoomScene> : <PetStage species={config.id} appearance={pet.appearance} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} />}
       <button type="button" className="pet-sound-toggle" aria-pressed={sound}
         onClick={() => { if (!sound) unlockPetSound(); setSound(!sound); }}>
         Sound {sound ? "on" : "off"}
@@ -67,6 +67,6 @@ export function PetHomePage({ pet }: { pet: ActivePet }) {
         onActionStart={() => { if (sound) unlockPetSound(); }}
         onActionSuccess={react}
       />
-    </div>
-  );
+    </div>;
+  return petContent;
 }

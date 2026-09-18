@@ -1,6 +1,6 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import type { SpeciesId } from "../../../convex/lib/species";
-import { resolveAppearance } from "../../../convex/lib/petAppearances";
+import { appearanceDetails, resolveAppearance } from "../../../convex/lib/petAppearances";
 import { sampleAnimation, type AnimationPose } from "../../lib/petAnimation";
 import type { PetEmotion } from "../../lib/petEmotion";
 export type PetPose = AnimationPose;
@@ -13,9 +13,11 @@ export function PetSprite({ species, appearance, pose = "idle", emotion = "conte
   const completeRef = useRef(onComplete);
   useEffect(() => { completeRef.current = onComplete; }, [onComplete]);
   const look = resolveAppearance(species, appearance);
+  const details = appearanceDetails(species, appearance);
   const emotionalIdle = pose === "idle" && emotion !== "content";
-  const group = look !== "classic" ? "variants" : (["cat", "dog", "bird"].includes(species) ? "companions" : "small-friends");
-  const source = emotionalIdle ? `/assets/pets/animations/moods-${group}.png` : `/assets/pets/animations/${species}-${look}.png`;
+  const generated = (species === "cat" && look === "silver") || (species === "dog" && look === "chocolate") || (species === "bird" && look === "sunny");
+  const group = generated ? "variants" : (["cat", "dog", "bird"].includes(species) ? "companions" : "small-friends");
+  const source = emotionalIdle ? `/assets/pets/animations/moods-${group}.png` : `/assets/pets/animations/${species}-${generated ? look : "classic"}.png`;
   const columns = emotionalIdle ? 6 : 4;
   const base = emotionalIdle ? SPECIES_ROW[species] * 6 + EMOTION_PAIR[emotion] : 0;
   const frameKey = `${source}:${pose}:${base}`;
@@ -48,7 +50,7 @@ export function PetSprite({ species, appearance, pose = "idle", emotion = "conte
   }, [source, pose, emotionalIdle, base, frameKey]);
   return <span aria-hidden="true" className={`pet-sprite ${small ? "pet-sprite-small" : ""}`}
     data-pose={pose} data-cell={cell} data-emotion={emotion}
-    style={{ backgroundImage: `url('${source}')`, backgroundSize: `${columns * 100}% ${columns * 100}%`,
+    style={{ backgroundImage: `url('${source}')`, filter: details.filter, backgroundSize: `${columns * 100}% ${columns * 100}%`,
       backgroundPosition: `${cell % columns * 100 / (columns - 1)}% ${Math.floor(cell / columns) * 100 / (columns - 1)}%` }} />;
 }
 

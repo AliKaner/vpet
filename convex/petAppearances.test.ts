@@ -3,6 +3,7 @@ import { convexTest } from "convex-test";
 import { expect, test } from "vitest";
 import schema from "./schema";
 import { api } from "./_generated/api";
+import { PET_APPEARANCES } from "./lib/petAppearances";
 const modules = import.meta.glob("./**/*.ts");
 async function setup() {
   const t = convexTest(schema, modules);
@@ -25,13 +26,18 @@ test("omitted appearance remains compatible with older clients", async () => {
   await owner.mutation(api.pets.createPet, { name: "Pip", species: "bird" });
   expect((await owner.query(api.pets.getMyPets))[0].appearance).toBe("classic");
 });
-test("species mismatch is rejected on both creation and update", async () => {
+test("each species accepts its six curated appearances", async () => {
+  for (const [species, appearances] of Object.entries(PET_APPEARANCES)) {
+    expect(appearances).toHaveLength(6);
+    expect(new Set(appearances.map((appearance) => appearance.id)).size).toBe(6);
+    expect(appearances.every((appearance) => typeof appearance.color === "string")).toBe(true);
+    expect(species).toBeTypeOf("string");
+  }
   const { owner } = await setup();
-  await expect(owner.mutation(api.pets.createPet, { name: "Pip", species: "bird", appearance: "silver" })).rejects.toThrow();
-  await owner.mutation(api.pets.createPet, { name: "Pip", species: "bird", appearance: "sunny" });
+  await owner.mutation(api.pets.createPet, { name: "Pip", species: "bird", appearance: "chocolate" });
   const [pet] = await owner.query(api.pets.getMyPets);
-  await expect(owner.mutation(api.pets.setAppearance, { petId: pet._id, appearance: "chocolate" })).rejects.toThrow();
-  expect((await owner.query(api.pets.getMyPets))[0].appearance).toBe("sunny");
+  await owner.mutation(api.pets.setAppearance, { petId: pet._id, appearance: "midnight" });
+  expect((await owner.query(api.pets.getMyPets))[0].appearance).toBe("midnight");
 });
 test("anonymous users and other owners cannot change a pet appearance", async () => {
   const { t, owner, other } = await setup();

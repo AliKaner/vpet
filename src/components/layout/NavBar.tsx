@@ -38,16 +38,13 @@ export function NavBar() {
         </div>
         <nav className="flex flex-wrap items-center gap-1">
           <NavLink to="/" end className={linkClass}>
-            Home
+            My Room
           </NavLink>
           <NavLink to="/shop" className={linkClass}>
             Shop
           </NavLink>
           <NavLink to="/barber" className={linkClass}>
             Barber
-          </NavLink>
-          <NavLink to="/room" className={linkClass}>
-            Room
           </NavLink>
           <NavLink to="/achievements" className={linkClass}>
             Achievements

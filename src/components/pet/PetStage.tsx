@@ -5,6 +5,7 @@ import type { SpeciesId } from "../../../convex/lib/species";
 import { EMOTION_LABEL, type PetEmotion } from "../../lib/petEmotion";
 import { actionPose, type PetAction } from "../../lib/petPose";
 import { PetSprite } from "./PetSprite";
+import { petAgeStage, PET_AGE_LABEL, type PetAgeStage } from "../../lib/petAge";
 
 const MOOD_LABEL = { great: "Feeling great!", content: "Doing okay", distressed: "Needs attention", critical: "In trouble!" };
 const REACTION: Record<SpeciesId, Record<PetAction, string>> = {
@@ -31,15 +32,18 @@ interface PetStageProps {
   emotion?: PetEmotion;
   reaction: { action: string; id: number } | null;
   onReactionComplete?: () => void;
+  ageMs?: number;
+  lifespanTargetMs?: number;
 }
 
-export function PetStage({ species, appearance, mood, emotion = "content", reaction, onReactionComplete }: PetStageProps) {
+export function PetStage({ species, appearance, mood, emotion = "content", reaction, onReactionComplete, ageMs = 0, lifespanTargetMs = 1 }: PetStageProps) {
   const pose = reaction ? actionPose(reaction.action) : "idle";
+  const age: PetAgeStage = petAgeStage(ageMs, lifespanTargetMs);
 
 
 
   return (
-    <div className={`pet-stage pet-mood-${mood} pet-cursor-${pose}`}>
+    <div className={`pet-stage pet-mood-${mood} pet-cursor-${pose} pet-age-${age}`} data-age={age}>
       <span className="pet-stage-caption">YOUR LITTLE COMPANION</span>
       <div className="pet-ground" />
       <div key={`${species}-${appearance}-${reaction?.id ?? "idle"}`} className="pet-actor">
@@ -48,6 +52,7 @@ export function PetStage({ species, appearance, mood, emotion = "content", react
       <p role="status" aria-live="polite" className="pet-reaction-label">
         {reaction ? (ACTION_LABEL[reaction.action] ?? REACTION[species][actionPose(reaction.action)]) : EMOTION_LABEL[emotion] ?? MOOD_LABEL[mood]}
       </p>
+      <span className="pet-age-label">{PET_AGE_LABEL[age]}</span>
     </div>
   );
 }

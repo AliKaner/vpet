@@ -13,7 +13,8 @@ import { LoginPage } from "./pages/LoginPage";
 import { PetCreatePage } from "./pages/PetCreatePage";
 import { PetHomePage } from "./pages/PetHomePage";
 import { PartnerPage } from "./pages/PartnerPage";
-import { RoomPage } from "./pages/RoomPage";
+import { RoomControls } from "./components/room/RoomControls";
+import { RoomScene } from "./components/room/RoomScene";
 import { ShopPage } from "./pages/ShopPage";
 import { SignupPage } from "./pages/SignupPage";
 import { VisitPage } from "./pages/VisitPage";
@@ -55,24 +56,19 @@ function HomeRoute() {
 
   return (
     <div className="flex flex-1 flex-col gap-5">
-      <div className="flex gap-4 overflow-x-auto pb-2">
-        {pets.map((pet) => (
-          <div key={pet._id} className="relative w-72 shrink-0">
-            {!pet.isMine && (
-              <span
-                className="absolute -right-1 -top-1 z-10 rounded-full bg-white px-1.5 py-0.5 text-xs shadow"
-                title="Your partner's pet"
-                aria-hidden
-              >
-                {"\u{1F91D}"}
-              </span>
-            )}
-            <PetHomePage pet={pet} />
-          </div>
-        ))}
-        <NewPetTile myPetsCount={myPetsCount} />
-      </div>
+      <RoomScene>
+        <div className="room-multi-pets">
+          {pets.map((pet) => (
+            <div key={pet._id} className="relative room-pet-card">
+              {!pet.isMine && <span className="room-partner-badge" title="Your partner's pet" aria-label="Partner's pet">🤝</span>}
+              <PetHomePage pet={pet} embedded />
+            </div>
+          ))}
+        </div>
+      </RoomScene>
+      <div className="flex justify-center"><NewPetTile myPetsCount={myPetsCount} /></div>
       {partnerStatus?.paired && <PartnerChat />}
+      <RoomControls />
     </div>
   );
 }
@@ -95,7 +91,7 @@ export default function App() {
             <Route path="/" element={<HomeRoute />} />
             <Route path="/create" element={<PetCreatePage />} />
             <Route path="/shop" element={<ShopPage />} />
-            <Route path="/room" element={<RoomPage />} />
+            <Route path="/room" element={<Navigate to="/" replace />} />
             <Route path="/barber" element={<BarberPage />} />
             <Route path="/achievements" element={<AchievementsPage />} />
             <Route path="/visit" element={<VisitPage />} />
