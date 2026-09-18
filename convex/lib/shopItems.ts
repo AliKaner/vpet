@@ -69,6 +69,14 @@ export function isRoomStyle(item: ShopItem): item is WallpaperItem | FloorItem {
 }
 
 export const SHOP_CATALOG: ShopItem[] = [
+  { id: "furniture_cat_tree", kind: "furniture", label: "Cat Tree", icon: "🐈", price: 65, description: "A climbing tower with a lavender lookout." },
+  { id: "furniture_perch", kind: "furniture", label: "Bird Perch", icon: "🦜", price: 40, description: "A raised perch for a feathered roommate." },
+  { id: "furniture_terrarium", kind: "furniture", label: "Glass Terrarium", icon: "🌿", price: 70, description: "A planted glass habitat for a quiet corner." },
+  { id: "furniture_tunnel", kind: "furniture", label: "Mouse Tunnel", icon: "🐭", price: 35, description: "A little lavender hideaway." },
+  { id: "furniture_hay", kind: "furniture", label: "Hay Bale", icon: "🌾", price: 30, description: "A golden bale for your stable corner." },
+  { id: "furniture_aquarium", kind: "furniture", label: "Mini Aquarium", icon: "🐠", price: 80, description: "A peaceful blue accent for your room." },
+  { id: "cloth_sweater", kind: "clothing", label: "Rose Sweater", icon: "🧶", price: 45, description: "A warm rose-colored knit." },
+  { id: "cloth_vest", kind: "clothing", label: "Forest Vest", icon: "🌿", price: 45, description: "A soft moss-green outfit." },
   {
     id: "toy_ball",
     kind: "toy",

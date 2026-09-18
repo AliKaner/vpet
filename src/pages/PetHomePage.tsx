@@ -12,10 +12,11 @@ import { StatBar } from "../components/pet/StatBar";
 import { useNow } from "../hooks/useNow";
 import { usePetLiveStats } from "../hooks/usePetLiveStats";
 import { RoomScene } from "../components/room/RoomScene";
+import { RoomPet } from "../components/room/RoomPet";
 
 type ActivePet = Doc<"pets"> & { ageMs: number; asOf: number };
 
-export function PetHomePage({ pet, embedded = false }: { pet: ActivePet; embedded?: boolean }) {
+export function PetHomePage({ pet, embedded = false, roomIndex = 0 }: { pet: ActivePet; embedded?: boolean; roomIndex?: number }) {
   const live = usePetLiveStats(pet);
   const now = useNow();
   const config = SPECIES_CONFIG[pet.species as SpeciesId];
@@ -44,7 +45,7 @@ export function PetHomePage({ pet, embedded = false }: { pet: ActivePet; embedde
         <AgeBadge ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} />
       </div>
 
-      {!embedded ? <RoomScene compact><PetStage species={config.id} appearance={pet.appearance} clothingId={pet.equippedClothingId} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} /></RoomScene> : <PetStage species={config.id} appearance={pet.appearance} clothingId={pet.equippedClothingId} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} />}
+      {!embedded ? <RoomScene compact><PetStage species={config.id} appearance={pet.appearance} clothingId={pet.equippedClothingId} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} /></RoomScene> : <RoomPet index={roomIndex} name={pet.name}><PetStage species={config.id} appearance={pet.appearance} clothingId={pet.equippedClothingId} mood={mood} emotion={petEmotion(vitals)} reaction={reaction?.petId === pet._id ? reaction : null} onReactionComplete={() => setReaction(null)} ageMs={live?.ageMs ?? pet.ageMs} lifespanTargetMs={pet.lifespanTargetMs} /></RoomPet>}
       <button type="button" className="pet-sound-toggle" aria-pressed={sound}
         onClick={() => { if (!sound) unlockPetSound(); setSound(!sound); }}>
         Sound {sound ? "on" : "off"}

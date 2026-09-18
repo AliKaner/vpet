@@ -38,6 +38,7 @@ async function ownsItem(ctx: QueryCtx, ownerIds: Id<"users">[], itemId: string):
 
 export const getMyRoom = query({
   args: {},
+  returns: v.object({ wallpaperId: v.optional(v.string()), floorId: v.optional(v.string()), placedItemIds: v.array(v.string()), placements: v.array(v.object({ itemId: v.string(), x: v.optional(v.number()), y: v.optional(v.number()), flipped: v.optional(v.boolean()) })) }),
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
     const roomKey = await getRoomKey(ctx, userId);
@@ -55,7 +56,23 @@ export const getMyRoom = query({
       wallpaperId: room?.wallpaperId,
       floorId: room?.floorId,
       placedItemIds: placements.map((p) => p.itemId),
+      placements: placements.map(({ itemId, x, y, flipped }) => ({ itemId, x, y, flipped })),
     };
+  },
+});
+
+export const moveItem = mutation({
+  args: { itemId: v.string(), x: v.number(), y: v.number(), flipped: v.boolean() },
+  returns: v.null(),
+  handler: async (ctx, { itemId, x, y, flipped }) => {
+    const userId = await requireUserId(ctx);
+    if (![x, y].every((n) => Number.isFinite(n) && n >= 8 && n <= 92)) throw new ConvexError("Keep furniture inside the room.");
+    const roomKey = await getRoomKey(ctx, userId);
+    const row = await ctx.db.query("roomPlacements").withIndex("by_room_item", (q) => q.eq("roomKey", roomKey).eq("itemId", itemId)).unique();
+    if (!row) throw new ConvexError("Place this item first.");
+    if (!(await ownsItem(ctx, await getHouseholdOwnerIds(ctx, userId), itemId))) throw new ConvexError("Your household doesn't own this item.");
+    await ctx.db.patch(row._id, { x, y, flipped });
+    return null;
   },
 });
 

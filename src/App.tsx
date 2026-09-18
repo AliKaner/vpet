@@ -59,10 +59,10 @@ function HomeRoute() {
     <div className="flex flex-1 flex-col gap-5">
       <RoomScene>
         <div className="room-multi-pets">
-          {pets.map((pet) => (
+          {pets.map((pet, index) => (
             <div key={pet._id} className="relative room-pet-card">
               {!pet.isMine && <span className="room-partner-badge" title="Your partner's pet" aria-label="Partner's pet">🤝</span>}
-              <PetHomePage pet={pet} embedded />
+              <PetHomePage pet={pet} embedded roomIndex={index} />
             </div>
           ))}
         </div>

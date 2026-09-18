@@ -4,6 +4,7 @@ import { v } from "convex/values";
 import { STARTING_PET_SLOTS } from "./lib/constants";
 import { appearanceValidator } from "./lib/petAppearances";
 import { eyeColorValidator, genderValidator, hairColorValidator, hairStyleValidator } from "./lib/character";
+import { skinToneValidator, accessoryValidator } from "./lib/character";
 
 const progressValidator = v.object({
   petsCreatedCount: v.number(),
@@ -28,6 +29,8 @@ export default defineSchema({
     characterEyeColor: v.optional(eyeColorValidator),
     characterHairColor: v.optional(hairColorValidator),
     characterClothingId: v.optional(v.string()),
+    characterSkinTone: v.optional(skinToneValidator),
+    characterAccessory: v.optional(accessoryValidator),
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),
@@ -142,6 +145,9 @@ export default defineSchema({
     roomKey: v.string(),
     itemId: v.string(), // key into the static SHOP_CATALOG (kind "decor" or "furniture")
     placedAt: v.number(),
+    x: v.optional(v.number()),
+    y: v.optional(v.number()),
+    flipped: v.optional(v.boolean()),
   })
     .index("by_room", ["roomKey"])
     .index("by_room_item", ["roomKey", "itemId"]),

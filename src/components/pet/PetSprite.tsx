@@ -16,11 +16,13 @@ export function PetSprite({ species, appearance, clothingId, pose = "idle", emot
   const look = resolveAppearance(species, appearance);
   const details = appearanceDetails(species, appearance);
   const emotionalIdle = pose === "idle" && emotion !== "content";
+  const midnightDog = species === "dog" && look === "midnight";
   const generated = (species === "cat" && look === "silver") || (species === "dog" && look === "chocolate") || (species === "bird" && look === "sunny");
   const group = generated ? "variants" : (["cat", "dog", "bird"].includes(species) ? "companions" : "small-friends");
-  const source = emotionalIdle ? `/assets/pets/animations/moods-${group}.png` : `/assets/pets/animations/${species}-${generated ? look : "classic"}.png`;
-  const columns = emotionalIdle ? 6 : 4;
-  const base = emotionalIdle ? SPECIES_ROW[species] * 6 + EMOTION_PAIR[emotion] : 0;
+  const source = midnightDog ? "/assets/pets/animations/dog-midnight.png" : emotionalIdle ? `/assets/pets/animations/moods-${group}.png` : `/assets/pets/animations/${species}-${generated ? look : "classic"}.png`;
+  const columns = midnightDog ? 4 : emotionalIdle ? 6 : 4;
+  const rows = midnightDog ? 7 : columns;
+  const base = emotionalIdle ? (midnightDog ? 16 : SPECIES_ROW[species] * 6) + EMOTION_PAIR[emotion] : 0;
   const frameKey = `${source}:${pose}:${base}`;
   const cell = frameState.key === frameKey ? frameState.cell : base;
   useEffect(() => {
@@ -52,8 +54,8 @@ export function PetSprite({ species, appearance, clothingId, pose = "idle", emot
   const clothing = clothingId ? getShopItem(clothingId) : undefined;
   return <span aria-hidden="true" className={`pet-sprite ${small ? "pet-sprite-small" : ""}`}
     data-pose={pose} data-cell={cell} data-emotion={emotion}
-    style={{ backgroundImage: `url('${source}')`, filter: details.filter, backgroundSize: `${columns * 100}% ${columns * 100}%`,
-      backgroundPosition: `${cell % columns * 100 / (columns - 1)}% ${Math.floor(cell / columns) * 100 / (columns - 1)}%` }}>
+    style={{ backgroundImage: `url('${source}')`, filter: midnightDog ? undefined : details.filter, backgroundSize: `${columns * 100}% ${rows * 100}%`,
+      backgroundPosition: `${cell % columns * 100 / (columns - 1)}% ${Math.floor(cell / columns) * 100 / (rows - 1)}%` }}>
     {clothing?.kind === "clothing" && <span className="pet-clothing" title={clothing.label}>{clothing.icon}</span>}
   </span>;
 }

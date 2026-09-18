@@ -1,0 +1,53 @@
+import assert from 'node:assert/strict';
+import { writeFile } from 'node:fs/promises';
+const targets = await (await fetch('http://127.0.0.1:9234/json')).json();
+const target = targets.find(t => t.type === 'page');
+const ws = new WebSocket(target.webSocketDebuggerUrl);
+await new Promise(resolve => ws.addEventListener('open',resolve,{once:true}));
+let sequence=0; const pending=new Map(); const errors=[];
+ws.addEventListener('message',({data}) => { const m=JSON.parse(data); if(m.method==='Runtime.exceptionThrown') errors.push(m.params.exceptionDetails.exception?.description ?? m.params.exceptionDetails.text); if(m.id) {const p=pending.get(m.id); pending.delete(m.id); if(m.error) p.reject(m.error); else p.resolve(m.result);} });
+function send(method,params={}) { return new Promise((resolve,reject) => {const id=++sequence;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));}); }
+async function evaluate(expression) {const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;}
+async function click(text) { await evaluate(`[...document.querySelectorAll('button')].find(b=>b.textContent==='${text}').click()`); await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))'); }
+await send('Runtime.enable');await send('Page.enable');
+await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+await send('Emulation.setDeviceMetricsOverride',{width:1050,height:1100,deviceScaleFactor:1,mobile:false});
+await send('Page.navigate',{url:'http://127.0.0.1:5178/room-preview.html'});
+await evaluate(`new Promise(resolve=>{const t=setInterval(()=>{if(document.querySelectorAll('.world-pet').length===2){clearInterval(t);resolve(true);}},50);})`);
+assert.equal(await evaluate(`document.querySelectorAll('.world-pet').length`),2);
+assert.equal(await evaluate(`document.querySelectorAll('.world-furniture').length`),6);
+await click('Decorate');
+const before=await evaluate(`(()=>{const b=document.querySelector('[aria-label="Cat Tree"]');const r=b.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,left:b.style.left,top:b.style.top};})()`);
+await send('Input.dispatchMouseEvent',{type:'mousePressed',x:before.x,y:before.y,button:'left',clickCount:1});
+await evaluate('new Promise(r=>requestAnimationFrame(r))');
+await send('Input.dispatchMouseEvent',{type:'mouseMoved',x:before.x+45,y:before.y+30,button:'left',buttons:1});
+await evaluate('new Promise(r=>requestAnimationFrame(r))');
+await send('Input.dispatchMouseEvent',{type:'mouseReleased',x:before.x+45,y:before.y+30,button:'left',clickCount:1});
+await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');
+const after=await evaluate(`(()=>{const b=document.querySelector('[aria-label="Cat Tree"]');return {left:b.style.left,top:b.style.top};})()`);
+assert.notDeepEqual(after,{left:before.left,top:before.top});
+await click('Flip direction');
+assert.equal(await evaluate(`document.querySelector('[aria-label="Cat Tree"] > span').style.transform`),'scaleX(-1)');
+await evaluate(`document.querySelector('[aria-label="Cat Tree"]').focus()`);
+await send('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowDown',code:'ArrowDown',windowsVirtualKeyCode:40});
+await send('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowDown',code:'ArrowDown',windowsVirtualKeyCode:40});
+await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');
+assert.notEqual(await evaluate(`document.querySelector('[aria-label="Cat Tree"]').style.top`),after.top);
+await click('Done');
+await evaluate('document.activeElement.blur()');
+await evaluate('new Promise(r=>setTimeout(r,350))');
+await writeFile('node_modules/.tmp/room-desktop.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+await evaluate('new Promise(r=>setTimeout(r,150))');
+assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'),false);
+await writeFile('node_modules/.tmp/room-mobile.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+await send('Page.navigate',{url:'http://127.0.0.1:5178/animation-preview.html'});
+await evaluate(`new Promise(resolve=>{const t=setInterval(()=>{if(document.querySelector('select')){clearInterval(t);resolve(true);}},50);})`);
+await click('dog');await click('Black puppy');
+const check = async () => {const result=await evaluate(`(()=>{const s=document.querySelector('.pet-sprite');return {source:s.style.backgroundImage,filter:s.style.filter,size:s.style.backgroundSize};})()`);assert.ok(result.source.includes('dog-midnight.png'));assert.equal(result.filter,'');assert.equal(result.size,'400% 700%');};
+await check();
+for(const pose of ['feed','pet','clean']) {await click(pose);await check();await evaluate(`new Promise(resolve=>{const t=setInterval(()=>{if(document.querySelector('[data-testid="playback-status"]').textContent==='Idle loop'){clearInterval(t);resolve(true);}},50);})`);await check();}
+for(const emotion of ['hungry','dirty','lonely','scared','happy']) {await evaluate(`(()=>{const s=document.querySelector('select');Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,'${emotion}');s.dispatchEvent(new Event('change',{bubbles:true}));})()`);await evaluate('new Promise(r=>requestAnimationFrame(r))');await check();}
+assert.deepEqual(errors,[]);
+console.log('PASS: two pets share scene; drag, keyboard move and flip; mobile overflow; black dog consistent atlas in all actions and moods; zero browser exceptions.');
+ws.close();

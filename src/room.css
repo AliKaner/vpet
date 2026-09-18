@@ -1,0 +1,31 @@
+.room-workspace { width:100%; }
+.room-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; padding:8px 4px; }
+.room-toolbar strong { font-size:16px; }
+.room-toolbar p { margin:2px 0; font-size:11px; color:#8a7266; }
+.room-toolbar button { padding:8px 14px; border-radius:20px; background:#e4eadb; font-size:12px; font-weight:800; cursor:pointer; }
+.room-toolbar button[aria-pressed=true] { background:#ffd1b8; }
+.room-toolbar button:disabled { opacity:.5; }
+.room-world { position:relative; isolation:isolate; width:100%; aspect-ratio:1.12; background:radial-gradient(ellipse at 50% 75%,#e6dbc4aa,transparent 65%); }
+.room-shell { position:absolute; inset:0; width:100%; height:100%; filter:drop-shadow(0 12px 8px #70543b18); }
+.world-furniture { position:absolute; width:19%; padding:0; border:0; background:none; transform:translate(-50%,-70%); cursor:default; }
+.furniture-art { display:block; width:100%; overflow:visible; }
+.furniture-pixel-art { display:block; width:100%; aspect-ratio:1; background-image:url('/assets/pets/room-isometric-v2.png'); background-size:400% 400%; image-rendering:pixelated; }
+.is-editing .world-furniture { cursor:grab; touch-action:none; }
+.is-editing .world-furniture:active { cursor:grabbing; }
+.world-furniture.selected,.world-furniture:focus-visible { outline:2px dashed #9c6949; outline-offset:2px; border-radius:12px; }
+.world-pet { position:absolute; width:22%; transform:translate(-50%,-80%); pointer-events:none; }
+.world-pet-name { position:absolute; bottom:0; left:50%; transform:translateX(-50%); font-size:11px; font-weight:800; white-space:nowrap; background:#fff6; padding:0 6px; border-radius:8px; }
+.world-pet .pet-stage,.world-compact-pet .pet-stage { min-height:0; padding:0; border:0; border-radius:0; background:none; overflow:visible; }
+.world-pet .pet-stage-caption,.world-pet .pet-age-label,.world-pet .pet-ground,.world-pet .pet-reaction-label,.world-compact-pet .pet-stage-caption,.world-compact-pet .pet-age-label,.world-compact-pet .pet-ground { display:none; }
+.world-pet .pet-actor,.world-compact-pet .pet-actor { width:100%; margin:0; }
+.world-pet .pet-sprite,.world-compact-pet .pet-sprite { width:100%; height:auto; aspect-ratio:1; }
+.world-character { position:absolute; left:27%; top:68%; width:12%; transform:translate(-50%,-95%); z-index:68; text-align:center; }
+.world-character > span { display:block; font-size:10px; font-weight:800; }
+.character-doll { display:block; width:120px; max-width:100%; flex-shrink:0; }
+.character-doll.small { width:48px; }
+.world-character .character-doll { width:100%; }
+.world-compact-pet { position:absolute; left:36%; top:45%; width:28%; z-index:70; }
+.room-multi-pets { margin-top:6px; }
+.room-pet-card { padding:14px; border:1px solid #e8ddca; border-radius:20px; background:#fff7; }
+.pet-sprite { position:relative; }
+@media(max-width:520px) { .world-pet-name { font-size:9px; } .room-toolbar strong { font-size:14px; } }
