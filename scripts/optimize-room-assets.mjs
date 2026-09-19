@@ -5,6 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 // Keep source PNGs intact. Content-addressed filenames safely support immutable caching.
 const sources = { base:'public/assets/pets/room-isometric-v2.png', themes:'public/assets/pets/room-themes-v1.png', styles:'public/assets/pets/room-styles-v1.png', garden:'public/assets/pets/room-garden-v1.png', hobbies:'public/assets/pets/room-hobbies-v1.png', living:'public/assets/pets/room-living-v1.png' };
 await mkdir('public/assets/room',{recursive:true});
+for(const name of ['essentials','studio','nature','enchanted','workshop']) sources[name]=`public/assets/pets/room-${name}-v1.png`;
 const urls = {};
 for (const [name,path] of Object.entries(sources)) {
   const source=await readFile(path);

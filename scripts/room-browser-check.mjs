@@ -46,11 +46,11 @@ await evaluate('new Promise(r=>setTimeout(r,150))');
 assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'),false);
 await writeFile('node_modules/.tmp/room-mobile.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
 const resources=await evaluate(`performance.getEntriesByType('resource').filter(e=>e.name.includes('/assets/room/')).map(e=>({name:e.name,type:e.initiatorType,start:e.startTime,duration:e.duration,bytes:e.encodedBodySize}))`);
-assert.equal(resources.length,6,'duplicate or missing room atlas requests');
+assert.equal(resources.length,11,'duplicate or missing room atlas requests');
 const preloaded=resources.filter(r=>r.type==='link');
 assert.equal(preloaded.length,4,'only core artwork should be preloaded');
 assert.ok(preloaded.reduce((sum,r)=>sum+r.bytes,0)<600000);
-assert.ok(resources.reduce((sum,r)=>sum+r.bytes,0)<1000000);
+assert.ok(resources.reduce((sum,r)=>sum+r.bytes,0)<2000000);
 assert.equal(await evaluate(`performance.getEntriesByType('resource').some(e=>e.name.includes('room-isometric-v2.png')||e.name.includes('room-themes-v1.png'))`),false);
 console.log('Cold-cache atlas requests:',JSON.stringify(resources));
 await send('Emulation.setDeviceMetricsOverride',{width:1050,height:1100,deviceScaleFactor:1,mobile:false});
@@ -82,7 +82,7 @@ assert.equal(await evaluate(`document.querySelector('.estate-world').dataset.hom
 assert.equal(await evaluate(`document.querySelector('.room-house').style.width`),'100%');
 assert.equal(await evaluate(`document.documentElement.scrollWidth>innerWidth`),false);
 await send('Emulation.setDeviceMetricsOverride',{width:1050,height:1100,deviceScaleFactor:1,mobile:false});
-for(const set of ['library','gamer','plants','plush','kitchen','patio','spa','curtains']) {
+for(const set of ['library','gamer','plants','plush','kitchen','patio','spa','curtains','lounge','bedroom','bathroom','accents','kitchenware','reading','gaming','music','cuddles','botanical','petcorner','outdoors','poolside','wallart','textiles','fantasy','cafe','atelier','curtains']) {
   await evaluate(`(()=>{const s=document.querySelector('.furniture-set-filter select');Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,'${set}');s.dispatchEvent(new Event('change',{bubbles:true}));})()`);
   await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');
   assert.equal(await evaluate(`document.querySelectorAll('.world-furniture').length`),4);
@@ -107,6 +107,26 @@ const check = async () => {const result=await evaluate(`(()=>{const s=document.q
 await check();
 for(const pose of ['feed','pet','clean']) {await click(pose);await check();await evaluate(`new Promise(resolve=>{const t=setInterval(()=>{if(document.querySelector('[data-testid="playback-status"]').textContent==='Idle loop'){clearInterval(t);resolve(true);}},50);})`);await check();}
 for(const emotion of ['hungry','dirty','lonely','scared','happy']) {await evaluate(`(()=>{const s=document.querySelector('select');Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,'${emotion}');s.dispatchEvent(new Event('change',{bubbles:true}));})()`);await evaluate('new Promise(r=>requestAnimationFrame(r))');await check();}
+assert.deepEqual(errors,[]);
+await send('Page.navigate',{url:'http://127.0.0.1:5178/activities-preview.html'});
+await evaluate(`new Promise(resolve=>{const t=setInterval(()=>{if(document.querySelector('.activities-page')){clearInterval(t);resolve(true);}},50);})`);
+await click('Collect gift');
+assert.ok(await evaluate(`document.querySelector('[role="status"]').textContent.includes('+15')`));
+await click('Start shift');
+assert.ok(await evaluate(`document.querySelector('.activity-errands').textContent.includes('Shift ends in')`));
+await click('Start playing');
+assert.equal(await evaluate(`document.querySelectorAll('.memory-card').length`),12);
+await evaluate(`document.querySelector('[aria-label="Reveal card 1"]').click()`);
+await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');
+assert.equal(await evaluate(`document.querySelector('.memory-card').textContent`),'🐱');
+assert.equal(await evaluate(`document.documentElement.scrollWidth>innerWidth`),false);
+await writeFile('node_modules/.tmp/activities-mobile.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+assert.ok(await evaluate(`[...document.querySelectorAll('.shop-decoration-card .furniture-pixel-art')].every(e=>e.getBoundingClientRect().width>=140 && e.style.backgroundImage.includes('.webp'))`));
+await evaluate(`document.querySelector('.shop-decoration-card').scrollIntoView()`);
+await writeFile('node_modules/.tmp/shop-catalog-mobile.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+await send('Emulation.setDeviceMetricsOverride',{width:1050,height:1100,deviceScaleFactor:1,mobile:false});
+await evaluate('window.scrollTo(0,0)');
+await writeFile('node_modules/.tmp/activities-desktop.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
 assert.deepEqual(errors,[]);
 console.log('PASS: two pets; drag/keyboard/flip; nine collections; four early WebP requests under 600 KB; mobile picker and garden placement; home growth; black dog actions/moods; zero browser exceptions.');
 ws.close();

@@ -1,4 +1,22 @@
 .room-workspace { width:100%; }
+.activities-page { display:flex; flex-direction:column; gap:22px; padding:24px 0; color:#604e43; }
+.activities-page h1 { font-size:32px; font-weight:900; }.activities-page h2 { font-size:21px; font-weight:800; }
+.activities-page p { font-size:13px; line-height:1.6; }.activities-page header a { display:inline-block; padding:10px 16px; margin-top:14px; background:#f3dfae; border-radius:18px; font-weight:800; }
+.activity-eyebrow { font-size:10px; letter-spacing:.16em; font-weight:800; color:#7b916c; }
+.activity-errands { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.activity-card { display:flex; flex-direction:column; gap:10px; padding:22px; border-radius:24px; background:#fffaf3; border:1px solid #e9dfcf; }
+.activity-illustration { font-size:42px; }.activity-card strong { font-size:12px; color:#826b45; }
+.activity-card > button { padding:12px 16px; background:#dfebd2; border-radius:14px; font-weight:800; cursor:pointer; margin-top:auto; }
+.activity-card button:disabled { opacity:.55; cursor:default; }
+.memory-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:12px 0; }
+.memory-card { aspect-ratio:1; border-radius:18px; background:#ead8c8; border:2px solid #d7c1aa; font-size:36px; cursor:pointer; transition:background .15s,transform .15s; }
+.memory-card.revealed { background:#fff1cf; transform:rotate(-2deg); }.memory-card.matched { background:#deedcc; border-color:#acc58e; opacity:1!important; }
+.activity-reward { position:sticky; bottom:16px; background:#dbeac8; border:1px solid #aac38b; padding:16px; border-radius:18px; font-weight:800; text-align:center; }
+@media(max-width:480px) { .activity-errands { grid-template-columns:1fr; }.activity-card { padding:18px; }.memory-card { font-size:29px; border-radius:12px; }.memory-grid { gap:7px; } }
+.shop-decoration-card .shop-item-heading { flex-direction:column; align-items:stretch; }
+.shop-decoration-card .shop-furniture-preview { width:100%; height:190px; flex:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.shop-decoration-card .shop-furniture-preview .furniture-pixel-art,.shop-decoration-card .shop-furniture-preview .furniture-art { width:170px; max-height:170px; }
+.shop-decoration-card > button { margin-top:auto; }
 .furniture-set-filter { display:flex; align-items:center; gap:10px; font-size:12px; font-weight:700; }
 .furniture-set-filter select { padding:10px; border:1px solid #decfbf; border-radius:12px; background:#fffaf3; max-width:100%; }
 .shop-furniture-preview { cursor:zoom-in; background:radial-gradient(ellipse,#e7e8da,transparent 72%); border-radius:12px; }

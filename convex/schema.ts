@@ -17,6 +17,11 @@ const progressValidator = v.object({
 
 export default defineSchema({
   ...authTables,
+  activities: defineTable({
+    ownerId:v.id("users"),day:v.string(),dailyClaimed:v.boolean(),memoryWins:v.number(),shiftsPaid:v.number(),
+    shiftReadyAt:v.optional(v.number()),gameId:v.number(),board:v.array(v.number()),matched:v.array(v.number()),
+    faceUp:v.array(v.number()),turn:v.number(),resetAt:v.number(),active:v.boolean(),expiresAt:v.number(),
+  }).index("by_owner",["ownerId"]),
 
   users: defineTable({
     ...authTables.users.validator.fields,

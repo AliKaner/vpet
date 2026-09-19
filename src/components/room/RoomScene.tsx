@@ -90,8 +90,11 @@ export function RoomSceneView({ room, character, move, remove, children, compact
         <RoomSurfaces wallpaperId={room.wallpaperId} floorId={room.floorId} level={level.level} />
         {indoor.map((p, index) => {
           const pos = position(p.itemId,index); const screen = project(pos.x,pos.y); const onWall = wallItem(p.itemId);
+          const item=getShopItem(p.itemId);
+          const width=FURNITURE_CELLS[p.itemId] === undefined ? 19 : 27*(item?.kind==="furniture"?(item.scale??1):1);
+          const floorMat=p.itemId.includes("rug") || (item?.kind==="furniture" && item.floorMat);
           const top = onWall ? 19+pos.y*.3 : screen.top;
-          return <button key={p.itemId} type="button" className={`world-furniture ${selected === p.itemId ? "selected" : ""}`} style={{ left: `${onWall ? 20+pos.x*.65 : screen.left}%`, top: `${top}%`, width:FURNITURE_CELLS[p.itemId] === undefined ? "19%" : "27%", transform:`translate(-50%,-${furnitureAnchor(p.itemId)}%)`, zIndex: p.itemId.includes("rug") ? 2 : Math.round(top) }} aria-label={getShopItem(p.itemId)?.label} aria-pressed={selected === p.itemId} disabled={saving}
+          return <button key={p.itemId} type="button" className={`world-furniture ${selected === p.itemId ? "selected" : ""}`} style={{ left: `${onWall ? 20+pos.x*.65 : screen.left}%`, top: `${top}%`, width:`${width}%`, transform:`translate(-50%,-${furnitureAnchor(p.itemId)}%)`, zIndex: floorMat ? 2 : Math.round(top) }} aria-label={item?.label} aria-pressed={selected === p.itemId} disabled={saving}
             onPointerDown={e => { if (!editing) return; e.currentTarget.setPointerCapture(e.pointerId); setSelected(p.itemId); setDrag({ id: p.itemId,startX:e.clientX,startY:e.clientY,pos }); }}
             onPointerMove={pointerMove} onPointerUp={() => { if (drag) { void persist(p.itemId,draft[p.itemId] ?? pos); setDrag(null); } }} onPointerCancel={() => { setDrag(null); setDraft({}); }}
             onKeyDown={e => { if (!editing || !["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) return; e.preventDefault(); setSelected(p.itemId); const next = { ...pos,x:Math.max(8,Math.min(92,pos.x+(e.key === "ArrowRight" ? 4 : e.key === "ArrowLeft" ? -4 : 0))),y:Math.max(8,Math.min(92,pos.y+(e.key === "ArrowDown" ? 4 : e.key === "ArrowUp" ? -4 : 0))) }; void persist(p.itemId,next); }}>

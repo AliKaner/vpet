@@ -16,6 +16,7 @@ import { PetHomePage } from "./pages/PetHomePage";
 import { PartnerPage } from "./pages/PartnerPage";
 import { RoomScene } from "./components/room/RoomScene";
 import { ShopPage } from "./pages/ShopPage";
+import { ActivitiesPage } from "./pages/ActivitiesPage";
 import { SignupPage } from "./pages/SignupPage";
 import { VisitPage } from "./pages/VisitPage";
 
@@ -90,6 +91,7 @@ export default function App() {
             <Route path="/" element={<HomeRoute />} />
             <Route path="/create" element={<PetCreatePage />} />
             <Route path="/shop" element={<ShopPage />} />
+            <Route path="/activities" element={<ActivitiesPage />} />
             <Route path="/room" element={<Navigate to="/" replace />} />
             <Route path="/barber" element={<BarberPage />} />
             <Route path="/character" element={<CharacterPage />} />

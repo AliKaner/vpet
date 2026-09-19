@@ -5,5 +5,10 @@ export const ROOM_ATLASES = {
   "styles": "/assets/room/styles-02a35e3f0121.webp",
   "garden": "/assets/room/garden-1443033b3100.webp",
   "hobbies": "/assets/room/hobbies-3e14a00076d5.webp",
-  "living": "/assets/room/living-45d1de37dce2.webp"
+  "living": "/assets/room/living-45d1de37dce2.webp",
+  "essentials": "/assets/room/essentials-5d78d6d9f68f.webp",
+  "studio": "/assets/room/studio-9933aac1aa6f.webp",
+  "nature": "/assets/room/nature-cab2eb73c722.webp",
+  "enchanted": "/assets/room/enchanted-a6bddbf32694.webp",
+  "workshop": "/assets/room/workshop-b60983a2956c.webp"
 } as const;

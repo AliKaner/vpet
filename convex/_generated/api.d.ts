@@ -9,6 +9,7 @@
  */
 
 import type * as achievements from "../achievements.js";
+import type * as activities from "../activities.js";
 import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
 import type * as decor from "../decor.js";
@@ -42,6 +43,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   achievements: typeof achievements;
+  activities: typeof activities;
   auth: typeof auth;
   crons: typeof crons;
   decor: typeof decor;

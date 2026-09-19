@@ -59,8 +59,8 @@ export function ShopItemCard({ item, owned, coins, pets }: ShopItemCardProps) {
   const equippedField = item.kind === "toy" ? "equippedToyId" : "equippedClothingId";
 
   return (
-    <div className="flex flex-col gap-2 rounded-cozy bg-white/70 p-4 shadow-sm">
-      <div className="flex items-center gap-3">
+    <div className={`flex flex-col gap-2 rounded-cozy bg-white/70 p-4 shadow-sm ${item.kind === "furniture" || item.kind === "decor" ? "shop-decoration-card" : ""}`}>
+      <div className="shop-item-heading flex items-center gap-3">
         {item.kind === "furniture" || item.kind === "decor" ? <FurniturePreview item={item} /> : item.kind === "wallpaper" || item.kind === "floor" ? <span className="shop-material-preview" aria-hidden style={{backgroundColor:item.bgColor}} /> : <span className="text-3xl" aria-hidden>{item.icon}</span>}
         <div className="flex-1">
           <p className="font-bold text-cocoa">{item.label}</p>

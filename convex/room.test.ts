@@ -15,8 +15,11 @@ test("every expansion item can be bought and placed; curtains require a wall",as
     await user.mutation(api.shop.buyItem,{itemId:item.id});
     if(item.wallMounted) await expect(user.mutation(api.decor.placeItem,{itemId:item.id,area:"garden"})).rejects.toThrow("inside");
     await user.mutation(api.decor.placeItem,{itemId:item.id,area:item.outdoor?"garden":"room"});
+    expect((await user.query(api.decor.getMyRoom)).placedItemIds).toContain(item.id);
+    await user.mutation(api.decor.removeItem,{itemId:item.id});
   }
-  expect((await user.query(api.decor.getMyRoom)).placements).toHaveLength(32);
+  expect((await user.query(api.decor.getMyRoom)).placements).toHaveLength(0);
+  expect(await user.query(api.shop.getMyInventory)).toHaveLength(SET_FURNITURE.length);
   expect(isWallFurniture("furniture_disco_armchair")).toBe(false);
   expect(isWallFurniture("decor_disco_ball")).toBe(true);
   expect(isWallFurniture("furniture_set_curtains_0")).toBe(true);

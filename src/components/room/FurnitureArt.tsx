@@ -3,6 +3,13 @@ import { ROOM_ATLASES } from "./roomAssetUrls";
 
 export function FurnitureArt({ id }: { id: string }) {
   const index=FURNITURE_CELLS[id];
+  if(index>=88) {
+    const group=Math.floor((index-88)/16),cell=(index-88)%16,row=Math.floor(cell/4);
+    const atlases=[ROOM_ATLASES.essentials,ROOM_ATLASES.studio,ROOM_ATLASES.nature,ROOM_ATLASES.enchanted,ROOM_ATLASES.workshop];
+    const cuts=[[0,.27,.505,.749,1],[0,.253,.505,.733,1],[0,.26,.51,.723,1],[0,.29,.52,.71,1],[0,.5,1]][group];
+    const height=cuts[row+1]-cuts[row],top=cuts[row],cellWidth=.25;
+    return <span className="furniture-pixel-art" aria-hidden="true" style={{backgroundImage:`url('${atlases[group]}')`,aspectRatio:group===4?"1":`${cellWidth/height}`,backgroundSize:`400% ${100/height}%`,backgroundPosition:`${cell%4*100/3}% ${top/(1-height)*100}%`}}/>;
+  }
   const cell=index === undefined ? undefined : index>=56 ? (index-56)%16 : index>=48 ? index-48 : index%16;
   const rows=index>=48 && index<56 ? 2 : 4;
   const atlas=index>=72 ? ROOM_ATLASES.living : index>=56 ? ROOM_ATLASES.hobbies : index>=48 ? ROOM_ATLASES.garden : index>=32 ? ROOM_ATLASES.styles : index>=16 ? ROOM_ATLASES.themes : ROOM_ATLASES.base;

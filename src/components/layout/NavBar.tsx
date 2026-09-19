@@ -43,6 +43,7 @@ export function NavBar() {
           <NavLink to="/shop" className={linkClass}>
             Shop
           </NavLink>
+          <NavLink to="/activities" className={linkClass}>Town Square</NavLink>
           <NavLink to="/barber" className={linkClass}>
             Barber
           </NavLink>

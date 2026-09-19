@@ -6,7 +6,8 @@ test('room atlases preserve alpha at delivery resolution and stay within downloa
   const manifest=await readFile('src/components/room/roomAssetUrls.ts','utf8');
   const urls=[...manifest.matchAll(/"(\/assets\/room\/[^"]+\.webp)"/g)].map(m=>m[1]);
   const sources=['public/assets/pets/room-isometric-v2.png','public/assets/pets/room-themes-v1.png','public/assets/pets/room-styles-v1.png','public/assets/pets/room-garden-v1.png','public/assets/pets/room-hobbies-v1.png','public/assets/pets/room-living-v1.png'];
-  assert.equal(urls.length,6);
+  sources.push(...['essentials','studio','nature','enchanted','workshop'].map(name=>`public/assets/pets/room-${name}-v1.png`));
+  assert.equal(urls.length,11);
   let total=0;
   for(const [i,url] of urls.entries()) {
     const resized=await sharp(sources[i]).resize({width:1024,withoutEnlargement:true,kernel:'nearest'}).png().toBuffer();

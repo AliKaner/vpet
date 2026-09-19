@@ -52,6 +52,8 @@ export interface FloorItem {
 }
 
 export interface FurnitureItem {
+  scale?: number;
+  floorMat?: boolean;
   collection?: FurnitureSetId;
   wallMounted?: boolean;
   theme?: RoomThemeId;
