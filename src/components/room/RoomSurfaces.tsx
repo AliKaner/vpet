@@ -27,6 +27,12 @@ export function RoomSurfaces({ wallpaperId,floorId,level=1 }: { wallpaperId?:str
     <path d="M8 66V30L50 6V42Z M50 6 92 30V66L50 42Z" fill={wall?.kind==="wallpaper" ? wall.bgColor : "#e1e9d8"} />
     <path d="M8 66V30L50 6V42Z M50 6 92 30V66L50 42Z" fill={`url(#${id}-motif)`} />
     <path d="M50 6 92 30V66L50 42Z" fill="#68533c" opacity=".1" />
+    {/* Wall trim: same thickness cue as the floor's front-edge band, along the top
+        and both outer side edges, so the walls read as having real depth rather
+        than flat 2D panels. */}
+    <path d="M8 30 50 6 50 8.6 8 32.6Z M50 6 92 30 92 32.6 50 8.6Z" fill="#af8864" opacity=".55" />
+    <path d="M8 30 8 66 10.4 66 10.4 31.4Z" fill="#68533c" opacity=".22" />
+    <path d="M92 30 92 66 89.6 66 89.6 31.4Z" fill="#68533c" opacity=".22" />
     {level>=5 && <g stroke="#f9ebd0" strokeWidth="1.2" strokeLinejoin="round">
       <path d="m16 33 22-12v20L16 53Z" fill="#9cc7c6"/><path d="m27 27v20m-11-4 22-12" fill="none"/>
       <path d="M9 31 50 8 91 31" fill="none" strokeWidth="2"/>
