@@ -5,6 +5,7 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import type { ShopItem } from "../../../convex/lib/shopItems";
 import { FurniturePreview } from "./FurniturePreview";
+import { ToyClothingArt } from "./ToyClothingArt";
 
 function errorMessage(error: unknown, fallback: string): string {
   if (error instanceof ConvexError && typeof error.data === "string") {
@@ -61,7 +62,15 @@ export function ShopItemCard({ item, owned, coins, pets }: ShopItemCardProps) {
   return (
     <div className={`flex flex-col gap-2 rounded-cozy bg-white/70 p-4 shadow-sm ${item.kind === "furniture" || item.kind === "decor" ? "shop-decoration-card" : ""}`}>
       <div className="shop-item-heading flex items-center gap-3">
-        {item.kind === "furniture" || item.kind === "decor" ? <FurniturePreview item={item} /> : item.kind === "wallpaper" || item.kind === "floor" ? <span className="shop-material-preview" aria-hidden style={{backgroundColor:item.bgColor}} /> : <span className="text-3xl" aria-hidden>{item.icon}</span>}
+        {item.kind === "furniture" || item.kind === "decor" ? (
+          <FurniturePreview item={item} />
+        ) : item.kind === "wallpaper" || item.kind === "floor" ? (
+          <span className="shop-material-preview" aria-hidden style={{ backgroundColor: item.bgColor }} />
+        ) : (
+          <span className="shop-toy-clothing-preview" aria-hidden>
+            <ToyClothingArt id={item.id} />
+          </span>
+        )}
         <div className="flex-1">
           <p className="font-bold text-cocoa">{item.label}</p>
           <p className="text-xs text-cocoa-soft">{item.description}</p>

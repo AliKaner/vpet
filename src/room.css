@@ -64,6 +64,8 @@
 .furniture-pixel-art { display:block; width:100%; aspect-ratio:1; background-size:400% 400%; image-rendering:pixelated; }
 .shop-furniture-preview { display:block; width:94px; flex:0 0 94px; }
 .shop-material-preview { display:block; width:64px; height:64px; flex:0 0 64px; border-radius:12px; border:3px solid #ffffff; box-shadow:0 1px 5px #76583e22; }
+.shop-toy-clothing-preview { display:block; width:64px; flex:0 0 64px; }
+.shop-toy-clothing-preview .furniture-art { width:100%; overflow:visible; }
 .room-inventory-preview { display:inline-block; width:54px; vertical-align:middle; }
 .room-theme-filter { display:flex; flex-wrap:wrap; gap:6px; }
 .room-theme-filter button { display:flex; align-items:center; gap:6px; padding:7px 10px; border:2px solid #eadfce; background:#fff9; border-radius:20px; font-size:11px; font-weight:800; cursor:pointer; }
