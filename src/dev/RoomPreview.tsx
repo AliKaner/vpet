@@ -8,6 +8,9 @@ import { SHOP_CATALOG } from "../../convex/lib/shopItems";
 import { ROOM_THEMES, THEMED_FURNITURE_TYPES, type RoomThemeId } from "../../convex/lib/roomThemes";
 import { ThemeFilter } from "../components/room/ThemeFilter";
 import { FurnitureArt } from "../components/room/FurnitureArt";
+import { FurniturePreview } from "../components/shop/FurniturePreview";
+import { FurnitureSetFilter } from "../components/room/FurnitureSetFilter";
+import { SET_FURNITURE, type FurnitureSetId } from "../../convex/lib/furnitureSets";
 import "../index.css";
 const character = { gender:"neutral",hairStyle:"bob",hairColor:"chestnut",eyeColor:"green",skinTone:"warm",accessory:"glasses",clothingId:"cloth_overalls" } as const;
 export function Preview() {
@@ -16,6 +19,13 @@ export function Preview() {
   ].map(p => ({...p,flipped:false})) });
   const [action,setAction] = useState<{action:string;id:number}|null>(null);
   const [theme,setTheme]=useState<RoomThemeId | "all">("all");
+  const [collection,setCollection]=useState<FurnitureSetId|"all">("all");
+  function chooseSet(value:FurnitureSetId|"all") {
+    setCollection(value);setTheme("all");
+    if(value==="all") return;
+    const coordinates=[[18,60],[65,16],[15,15],[72,65]];
+    setRoom(prev=>({...prev,placements:SET_FURNITURE.filter(i=>i.collection===value).map((item,i)=>({itemId:item.id,x:coordinates[i][0],y:coordinates[i][1],flipped:false,area:item.outdoor?"garden":"room"}))}));
+  }
   function chooseTheme(value:RoomThemeId | "all") {
     setTheme(value);
     if(value==="all") return;
@@ -26,6 +36,6 @@ export function Preview() {
     <RoomPet index={0} name="Miso"><PetStage species="cat" mood="content" reaction={null} /></RoomPet>
     <RoomPet index={1} name="Pepper"><PetStage species="dog" appearance="midnight" mood="content" reaction={action} onReactionComplete={() => setAction(null)} /></RoomPet>
     <div className="room-toolbar">{["feed","pet","clean"].map(action => <button key={action} onClick={() => setAction({action,id:Date.now()})}>{action}</button>)}</div>
-  </RoomSceneView><div className="theme-preview-gallery">{ROOM_THEMES.flatMap(t=>THEMED_FURNITURE_TYPES.map(type=><div key={`${t.id}-${type.id}`}><FurnitureArt id={`furniture_${t.id}_${type.id}`} /><p>{t.label} {type.label}</p></div>))}</div><div style={{ display:"flex",flexWrap:"wrap" }}>{SHOP_CATALOG.filter(i => i.kind === "clothing").map(i => <div key={i.id}><CharacterAvatar character={{ ...character,clothingId:i.id }} /><p>{i.label}</p></div>)}</div></main>;
+  </RoomSceneView><FurnitureSetFilter value={collection} onChange={chooseSet}/><div className="theme-preview-gallery">{SHOP_CATALOG.filter(i=>i.kind==="furniture" && i.collection===collection).map(item=><div key={item.id}><FurniturePreview item={item}/><p>{item.label}</p></div>)}</div><div className="theme-preview-gallery">{ROOM_THEMES.flatMap(t=>THEMED_FURNITURE_TYPES.map(type=><div key={`${t.id}-${type.id}`}><FurnitureArt id={`furniture_${t.id}_${type.id}`} /><p>{t.label} {type.label}</p></div>))}</div><div style={{ display:"flex",flexWrap:"wrap" }}>{SHOP_CATALOG.filter(i => i.kind === "clothing").map(i => <div key={i.id}><CharacterAvatar character={{ ...character,clothingId:i.id }} /><p>{i.label}</p></div>)}</div></main>;
 }
 createRoot(document.getElementById("root")!).render(<Preview />);

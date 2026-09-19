@@ -1,7 +1,7 @@
 import { useId } from "react";
 import { getShopItem } from "../../../convex/lib/shopItems";
 import { ROOM_THEMES } from "../../../convex/lib/roomThemes";
-export function RoomSurfaces({ wallpaperId,floorId }: { wallpaperId?:string;floorId?:string }) {
+export function RoomSurfaces({ wallpaperId,floorId,level=1 }: { wallpaperId?:string;floorId?:string;level?:number }) {
   const id=useId().replace(/:/g,"");
   const wall=wallpaperId ? getShopItem(wallpaperId) : undefined;
   const floor=floorId ? getShopItem(floorId) : undefined;
@@ -27,6 +27,11 @@ export function RoomSurfaces({ wallpaperId,floorId }: { wallpaperId?:string;floo
     <path d="M8 66V30L50 6V42Z M50 6 92 30V66L50 42Z" fill={wall?.kind==="wallpaper" ? wall.bgColor : "#e1e9d8"} />
     <path d="M8 66V30L50 6V42Z M50 6 92 30V66L50 42Z" fill={`url(#${id}-motif)`} />
     <path d="M50 6 92 30V66L50 42Z" fill="#68533c" opacity=".1" />
+    {level>=5 && <g stroke="#f9ebd0" strokeWidth="1.2" strokeLinejoin="round">
+      <path d="m16 33 22-12v20L16 53Z" fill="#9cc7c6"/><path d="m27 27v20m-11-4 22-12" fill="none"/>
+      <path d="M9 31 50 8 91 31" fill="none" strokeWidth="2"/>
+      {level>=6 && <><path d="m63 22 21 12v19L63 41Z" fill="#9cc7c6"/><path d="m74 28v19m-11-15 21 12" fill="none"/><path d="M10 33v29M49 11v28M90 33v29" strokeWidth="2"/><path d="m13 66 37 21 37-21" fill="none" stroke="#f3dfb4"/></>}
+    </g>}
     <path d="M8 63 50 39 92 63M50 6V42" fill="none" stroke="#fcf1d9" strokeWidth="1.2" />
     <path d="M8 66 50 90 92 66V69L50 93 8 69Z" fill="#af8864" />
   </svg>;

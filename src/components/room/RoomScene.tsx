@@ -1,7 +1,7 @@
 import { useRef,useState, type ReactNode, type PointerEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { getShopItem } from "../../../convex/lib/shopItems";
+import { getShopItem, isWallFurniture } from "../../../convex/lib/shopItems";
 import { CharacterAvatar } from "../character/CharacterAvatar";
 import { FurnitureArt } from "./FurnitureArt";
 import { FURNITURE_CELLS, furnitureAnchor } from "./furnitureAtlas";
@@ -11,7 +11,7 @@ import { DecorationDialog } from "./DecorationDialog";
 import { RoomControls } from "./RoomControls";
 import { HOME_LEVELS,homeLevel } from "../../../convex/lib/homeLevels";
 import type { Character } from "../../../convex/lib/character";
-const wallItem = (id: string) => /window$|clock|poster|banner|streamers|disco/.test(id);
+const wallItem = isWallFurniture;
 type Position = { x: number; y: number; flipped: boolean };
 const project = (x: number, y: number) => ({ left: 50+(x-y)*.42, top: 42+(x+y)*.24 });
 export function RoomScene({ children, compact = false }: { children: ReactNode; compact?: boolean }) {
@@ -45,6 +45,10 @@ export function RoomSceneView({ room, character, move, remove, children, compact
   const [drag, setDrag] = useState<{ id: string; startX: number; startY: number; pos: Position;garden?:boolean } | null>(null);
   const placements = room?.placements ?? [];
   const level=homeLevel(room.level);
+  function gardenBounds(x:number) {
+    const offset=Math.abs(24+x*.52-50);
+    return {inner:level.width*.9/1.12+2-offset*.24/.42/1.12,outer:96-offset*.78};
+  }
   const next=HOME_LEVELS.find(candidate=>candidate.level===level.level+1);
   const indoor=placements.filter(p=>p.area!=="garden");
   const garden=placements.filter(p=>p.area==="garden");
@@ -67,7 +71,9 @@ export function RoomSceneView({ room, character, move, remove, children, compact
     const clamp = (n: number) => Math.max(8, Math.min(92, Math.round(n/4)*4));
     if(drag.garden) {
       const x=clamp(drag.pos.x+dx/.52);
-      const y=clamp(drag.pos.y+(dy+(Math.abs(x-50)-Math.abs(drag.pos.x-50))*.14)/.12);
+      const before=gardenBounds(drag.pos.x);const after=gardenBounds(x);
+      const top=before.inner+(before.outer-before.inner)*drag.pos.y/100+dy;
+      const y=clamp((top-after.inner)/(after.outer-after.inner)*100);
       setDraft(prev=>({...prev,[drag.id]:{...drag.pos,x,y}}));return;
     }
     const onWall = wallItem(drag.id);
@@ -77,11 +83,11 @@ export function RoomSceneView({ room, character, move, remove, children, compact
     <section className="room-workspace">
       <div className="room-toolbar"><div><strong>{level.label} · Lv. {level.level}</strong><p>{editing ? "Drag furniture · arrow keys to move · flip to change direction" : `${indoor.length}/${level.indoor} inside · ${garden.length}/${level.garden} garden spaces`}</p></div><div className="room-toolbar-actions">{editing && <button onClick={()=>setPickerOpen(true)}>Choose furniture</button>}<button onClick={() => {setEditing(!editing);setSelected(null);if(!editing)setPickerOpen(true);}} aria-pressed={editing}>{editing ? "Done" : "Decorate"}</button></div></div>
       {next && onUpgrade && <div className="home-upgrade"><span>Next: {next.indoor} indoor + {next.garden} garden spaces</span><button disabled={saving || coins<next.price} onClick={async()=>{setSaving(true);setError("");try{await onUpgrade();}catch{setError("Couldn't expand your home. Check your coins and current level.");}finally{setSaving(false);}}}>Expand home · {next.price} coins</button></div>}
-      <div className="estate-world" ref={estateRef}>
-        <svg className="estate-garden" style={{transform:`scale(${.88+(level.level-1)*.04})`,transformOrigin:"50% 60%"}} viewBox="0 0 100 100" aria-hidden="true"><path d="M50 23 98 59 50 98 2 59Z" fill="#a3bd86" stroke="#7f9e68" strokeWidth="1" /><path d="M50 27 94 59 50 94 6 59Z" fill="#b8cf99" /><path d="m43 88 7 5 7-5-7-5Z" fill="#e5d4ad" />{[0,1,2,3,4,5].map(i=><g key={i} fill="#f3d7a2"><circle cx={9+i*3} cy={60+i*2} r=".5"/><circle cx={91-i*3} cy={60+i*2} r=".5"/></g>)}</svg>
+      <div className={`estate-world estate-level-${level.level}`} ref={estateRef} data-home-model={level.label}>
+        <svg className="estate-garden" style={{transform:`scale(${Math.min(1,.88+(level.level-1)*.04)})`,transformOrigin:"50% 60%"}} viewBox="0 0 100 100" aria-hidden="true"><path d="M50 23 98 59 50 98 2 59Z" fill="#a3bd86" stroke="#7f9e68" strokeWidth="1" /><path d="M50 27 94 59 50 94 6 59Z" fill="#b8cf99" /><path d="m43 88 7 5 7-5-7-5Z" fill="#e5d4ad" />{level.level>=5 && <><path d="m9 59 41 31 41-31M18 66l32 24 32-24" fill="none" stroke="#e5d4ad" strokeWidth="2"/><path d="M5 59 50 94 95 59" fill="none" stroke="#638650" strokeWidth="2" strokeDasharray="2 1"/></>}{[0,1,2,3,4,5].map(i=><g key={i} fill="#f3d7a2"><circle cx={9+i*3} cy={60+i*2} r=".5"/><circle cx={91-i*3} cy={60+i*2} r=".5"/></g>)}</svg>
       <div className="room-house" style={{width:`${level.width}%`}}>
       <div ref={setWorld} className={`room-world ${editing ? "is-editing" : ""}`}>
-        <RoomSurfaces wallpaperId={room.wallpaperId} floorId={room.floorId} />
+        <RoomSurfaces wallpaperId={room.wallpaperId} floorId={room.floorId} level={level.level} />
         {indoor.map((p, index) => {
           const pos = position(p.itemId,index); const screen = project(pos.x,pos.y); const onWall = wallItem(p.itemId);
           const top = onWall ? 19+pos.y*.3 : screen.top;
@@ -98,7 +104,8 @@ export function RoomSceneView({ room, character, move, remove, children, compact
       </div>
       {garden.map((p,index)=>{
         const pos=position(p.itemId,index);
-        const top=73+pos.y*.12-Math.abs(pos.x-50)*.14;
+        const bounds=gardenBounds(pos.x);
+        const top=bounds.inner+(bounds.outer-bounds.inner)*pos.y/100;
         return <button key={p.itemId} className={`world-furniture garden-furniture ${editing ? "editable" : ""} ${selected===p.itemId ? "selected" : ""}`} style={{left:`${24+pos.x*.52}%`,top:`${top}%`,width:"22%",transform:`translate(-50%,-${furnitureAnchor(p.itemId)}%)`,zIndex:100+Math.round(top)}} aria-label={getShopItem(p.itemId)?.label} disabled={saving}
           onPointerDown={e=>{if(!editing)return;e.currentTarget.setPointerCapture(e.pointerId);setSelected(p.itemId);setDrag({id:p.itemId,startX:e.clientX,startY:e.clientY,pos,garden:true});}}
           onPointerMove={pointerMove} onPointerUp={()=>{if(drag){void persist(p.itemId,draft[p.itemId]??pos);setDrag(null);}}} onPointerCancel={()=>{setDrag(null);setDraft({});}}

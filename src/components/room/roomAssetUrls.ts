@@ -3,5 +3,7 @@ export const ROOM_ATLASES = {
   "base": "/assets/room/base-3d57c6e09363.webp",
   "themes": "/assets/room/themes-3a900fc3e961.webp",
   "styles": "/assets/room/styles-02a35e3f0121.webp",
-  "garden": "/assets/room/garden-1443033b3100.webp"
+  "garden": "/assets/room/garden-1443033b3100.webp",
+  "hobbies": "/assets/room/hobbies-3e14a00076d5.webp",
+  "living": "/assets/room/living-45d1de37dce2.webp"
 } as const;

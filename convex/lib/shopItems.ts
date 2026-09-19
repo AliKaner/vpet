@@ -1,4 +1,5 @@
 import { ROOM_THEMES, THEMED_FURNITURE_TYPES, THEME_LABELS, type RoomThemeId } from "./roomThemes";
+import { SET_FURNITURE, type FurnitureSetId } from "./furnitureSets";
 
 export interface ToyItem {
   id: string;
@@ -51,6 +52,8 @@ export interface FloorItem {
 }
 
 export interface FurnitureItem {
+  collection?: FurnitureSetId;
+  wallMounted?: boolean;
   theme?: RoomThemeId;
   outdoor?: boolean;
   id: string;
@@ -69,12 +72,18 @@ export function isPlaceable(item: ShopItem): item is DecorItem | FurnitureItem {
   return item.kind === "decor" || item.kind === "furniture";
 }
 
+export function isWallFurniture(id: string): boolean {
+  const item = getShopItem(id);
+  return item?.kind === "furniture" ? item.wallMounted === true : item?.kind === "decor" && /window$|clock|poster|banner|streamers|disco/.test(id);
+}
+
 /** Items that set a single active room style rather than being placed individually. */
 export function isRoomStyle(item: ShopItem): item is WallpaperItem | FloorItem {
   return item.kind === "wallpaper" || item.kind === "floor";
 }
 
 export const SHOP_CATALOG: ShopItem[] = [
+  ...SET_FURNITURE.map((item): FurnitureItem => ({...item,kind:"furniture",icon:"🛋️",description:`Part of the ${item.collection} set. Place, move and flip it to make it yours.`})),
   ...ROOM_THEMES.flatMap((theme): ShopItem[] => [
     ...THEMED_FURNITURE_TYPES.map((type,index): FurnitureItem => ({
       id:`furniture_${theme.id}_${type.id}`, kind:"furniture", theme:theme.id,

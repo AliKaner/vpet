@@ -20,6 +20,7 @@ import type * as lib_achievements from "../lib/achievements.js";
 import type * as lib_careActions from "../lib/careActions.js";
 import type * as lib_character from "../lib/character.js";
 import type * as lib_constants from "../lib/constants.js";
+import type * as lib_furnitureSets from "../lib/furnitureSets.js";
 import type * as lib_homeLevels from "../lib/homeLevels.js";
 import type * as lib_petAppearances from "../lib/petAppearances.js";
 import type * as lib_petMath from "../lib/petMath.js";
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   "lib/careActions": typeof lib_careActions;
   "lib/character": typeof lib_character;
   "lib/constants": typeof lib_constants;
+  "lib/furnitureSets": typeof lib_furnitureSets;
   "lib/homeLevels": typeof lib_homeLevels;
   "lib/petAppearances": typeof lib_petAppearances;
   "lib/petMath": typeof lib_petMath;

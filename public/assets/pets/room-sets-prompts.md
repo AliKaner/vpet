@@ -1,0 +1,11 @@
+# Expansion furniture atlases
+
+Reference: room-themes-v1.png. Original pet and furniture assets preserved.
+
+## room-hobbies-v1.png
+
+Create a NEW transparent PNG furniture sprite atlas matching the attached cozy hand-painted outlined isometric game furniture. EXACT 4 columns by 4 rows, 16 separate objects on TRUE alpha transparent background, no text, no grid, no ground tiles, no room, no haze. Each object entirely inside central 64% of its equal square cell with large 18% transparent gutters on every side. Consistent isometric view showing top and two sides, dark warm outlines, cute detailed game assets. Do NOT reuse reference objects. Row 1 library: tall oak bookcase full of colorful books; low mint bookcase; tufted reading armchair with book; wheeled library book trolley. Row 2 gamer: purple dual-monitor gaming desk; black and cyan gaming chair; glass RGB PC cabinet tower; purple retro arcade cabinet. Row 3 plants: potted monstera; tiered fern stand; potted palm tree; basket of daisies. Row 4 plush: seated teddy bear; pink bunny plush; cream cat plush; green frog plush.
+
+## room-living-v1.png
+
+Create a NEW transparent PNG furniture sprite atlas matching the attached cozy hand-painted outlined isometric game furniture. EXACT 4 columns by 4 rows, 16 separate objects on TRUE alpha transparent background, no text, no grid, no ground tiles, no room, no haze. Each object entirely inside central 64% of its equal square cell with large 18% transparent gutters on every side. Consistent isometric view showing top and two sides, dark warm outlines, cute detailed game assets. Do NOT reuse reference objects. Row 1 kitchen: mint retro refrigerator; cream stove oven; oak kitchen sink counter; kitchen island with two stools. Row 2 garden: round patio table with two chairs; wooden flower swing; freestanding hammock; barbecue grill. Row 3 spa: square bubbling wooden jacuzzi filled with blue water; slatted sauna lounge; striped parasol with daybed; wooden towel rack with rolled towels. Row 4 curtains: pink bow curtains framing a small window; lavender star curtains framing a window; sage linen curtains framing a window; black gothic velvet curtains framing a window. Curtains and windows seen isometrically aligned to right wall receding upwards to left, entirely contained in cell.

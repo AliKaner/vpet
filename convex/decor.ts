@@ -1,6 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
-import { getShopItem, isPlaceable } from "./lib/shopItems";
+import { getShopItem, isPlaceable, isWallFurniture } from "./lib/shopItems";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { HOME_LEVELS, homeLevel } from "./lib/homeLevels";
@@ -126,9 +126,9 @@ export const placeItem = mutation({
     if (existing !== null) return null;
     const room=await ctx.db.query("rooms").withIndex("by_room",q=>q.eq("roomKey",roomKey)).unique();
     const limits=homeLevel(room?.level);
-    const placements=await ctx.db.query("roomPlacements").withIndex("by_room",q=>q.eq("roomKey",roomKey)).take(100);
+    const placements=await ctx.db.query("roomPlacements").withIndex("by_room",q=>q.eq("roomKey",roomKey)).take(201);
     if(placements.filter(p=>(p.area ?? "room")===area).length>=limits[area==="room" ? "indoor" : "garden"]) throw new ConvexError("Upgrade your home to make more space.");
-    if(item.kind==="decor" && /window$|clock|poster|banner|streamers|disco/.test(item.id) && area==="garden") throw new ConvexError("Wall decorations belong inside.");
+    if(isWallFurniture(item.id) && area==="garden") throw new ConvexError("Wall decorations belong inside.");
     const count=placements.filter(p=>(p.area ?? "room")===area).length;
 
     await ctx.db.insert("roomPlacements", { roomKey,itemId,area,placedAt:Date.now(),x:20+(count%4)*20,y:20+Math.floor(count/4)%4*20 });

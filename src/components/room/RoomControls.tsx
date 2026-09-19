@@ -7,6 +7,8 @@ import { api } from "../../../convex/_generated/api";
 import { SHOP_CATALOG, type ShopItem } from "../../../convex/lib/shopItems";
 import { ThemeFilter } from "./ThemeFilter";
 import { FurnitureArt } from "./FurnitureArt";
+import { FurnitureSetFilter } from "./FurnitureSetFilter";
+import type { FurnitureSetId } from "../../../convex/lib/furnitureSets";
 import type { RoomThemeId } from "../../../convex/lib/roomThemes";
 
 const groups: { kind: ShopItem["kind"]; label: string }[] = [
@@ -25,12 +27,13 @@ export function RoomControls({onPlaced}:{onPlaced?:(itemId?:string)=>void}={}) {
   const [theme,setTheme] = useState<RoomThemeId | "all">("all");
   const [area,setArea]=useState<"room"|"garden">("room");
   const [busy,setBusy]=useState(false);
+  const [collection,setCollection]=useState<FurnitureSetId|"all">("all");
   if (!room || !owned) return <p className="text-center text-xs text-cocoa-soft">Loading room controls…</p>;
   const ownedSet = new Set(owned);
   const placed = new Set(room.placedItemIds);
   const limits=homeLevel(room.level);
   const count=room.placements.filter(p=>(p.area??"room")===area).length;
-  const visible = SHOP_CATALOG.filter(item => theme === "all" || ("theme" in item && item.theme === theme));
+  const visible = SHOP_CATALOG.filter(item => (theme === "all" || ("theme" in item && item.theme === theme)) && (collection==="all" || (item.kind==="furniture" && item.collection===collection)) && !(area==="garden" && item.kind==="furniture" && item.wallMounted));
   async function toggle(item: ShopItem) {
     setBusy(true);
     try { setError(null); if (placed.has(item.id)) await remove({ itemId: item.id }); else {await place({ itemId:item.id,area });onPlaced?.(item.id);} }
@@ -43,7 +46,8 @@ export function RoomControls({onPlaced}:{onPlaced?:(itemId?:string)=>void}={}) {
   }
   return <section className="room-controls" aria-label="Decorate your room">
     <div className="flex items-center justify-between"><div><h2 className="font-display text-xl font-extrabold text-cocoa">Make the room yours</h2><p className="text-xs text-cocoa-soft">Tap an owned item to place or remove it. Changes appear above instantly.</p></div><span aria-hidden>🛋️</span></div>
-    <ThemeFilter value={theme} onChange={setTheme} />
+    <ThemeFilter value={theme} onChange={value=>{setTheme(value);setCollection("all");}} />
+    <FurnitureSetFilter value={collection} onChange={value=>{setCollection(value);setTheme("all");}} />
     <div className="room-theme-filter" role="group" aria-label="Placement area"><button type="button" aria-pressed={area==="room"} onClick={()=>setArea("room")}>Inside</button><button type="button" aria-pressed={area==="garden"} onClick={()=>setArea("garden")}>Garden</button></div>
     <p className="text-xs text-cocoa-soft">{count}/{area==="room"?limits.indoor:limits.garden} spaces used · Expand your home for more space.</p>
     <Link to="/shop" onClick={()=>onPlaced?.()} className="text-sm font-bold text-peach-dark">Shop more furniture →</Link>
