@@ -1,4 +1,32 @@
 .room-workspace { width:100%; }
+.estate-world { position:relative; isolation:isolate; width:100%; aspect-ratio:1; }
+.estate-garden { position:absolute; inset:0; width:100%; height:100%; filter:drop-shadow(0 12px 9px #73845422); }
+.room-house { position:absolute; top:0; left:50%; transform:translateX(-50%); z-index:10; transition:width .35s; }
+.room-house .room-world { background:none; }
+.garden-furniture.editable { touch-action:none; cursor:grab; }
+.garden-caption { position:absolute; bottom:1%; left:50%; transform:translateX(-50%); color:#61724e; font-size:10px; font-weight:800; }
+.room-toolbar-actions { display:flex; gap:6px; }
+.home-upgrade { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; font-size:11px; padding:8px 10px; background:#eaf0df; border-radius:14px; }
+.home-upgrade button { padding:7px 12px; border-radius:12px; background:#d1dfba; font-weight:800; cursor:pointer; }
+.home-upgrade button:disabled { opacity:.5; cursor:default; }
+.decoration-dialog { border:0; border-radius:24px; padding:0; width:min(720px,calc(100vw - 32px)); max-height:80dvh; background:#fcf7ef; color:#5b4638; margin:auto; box-shadow:0 24px 80px #30243555; }
+.decoration-dialog::backdrop { background:#30243560; backdrop-filter:blur(3px); }
+.decoration-sheet { padding:20px; overflow:auto; max-height:80dvh; }
+.decoration-sheet > header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+.decoration-sheet > header { position:sticky; top:-20px; z-index:2; padding:12px 0; background:#fcf7ef; }
+.decoration-sheet h2 { font-size:22px; font-weight:800; }
+.decoration-sheet header p { font-size:12px; color:#8a7266; }
+.decoration-sheet header button { padding:8px 12px; background:#ede4d8; border-radius:50%; cursor:pointer; }
+.decoration-sheet .room-controls { padding:0; border:0; box-shadow:none; background:none; }
+.decoration-sheet .room-controls > div:first-child:not(.room-theme-filter) { display:none; }
+.decoration-sheet .room-control-items { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.decoration-sheet .room-control-items button { display:flex; flex-direction:column; justify-content:center; align-items:center; padding:8px; border-radius:14px; font-size:11px; }
+.decoration-sheet .room-inventory-preview { width:100%; max-width:110px; }
+.decoration-sheet .room-empty { grid-column:1/-1; }
+.preview-picker-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.preview-picker-grid button { font-size:11px; border:1px solid #decfbf; border-radius:14px; padding:5px; cursor:pointer; }
+.character-studio > .character-doll { width:180px; background:radial-gradient(ellipse at 50% 65%,#e9ded5,transparent 70%); }
+@media(max-width:600px) { .decoration-dialog { width:100%; max-width:100%; max-height:72dvh; margin:auto 0 0; border-radius:24px 24px 0 0; } .decoration-sheet { max-height:72dvh; padding-bottom:calc(20px + env(safe-area-inset-bottom)); } }
 .room-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; padding:8px 4px; }
 .room-toolbar strong { font-size:16px; }
 .room-toolbar p { margin:2px 0; font-size:11px; color:#8a7266; }
@@ -9,7 +37,15 @@
 .room-shell { position:absolute; inset:0; width:100%; height:100%; filter:drop-shadow(0 12px 8px #70543b18); }
 .world-furniture { position:absolute; width:19%; padding:0; border:0; background:none; transform:translate(-50%,-70%); cursor:default; }
 .furniture-art { display:block; width:100%; overflow:visible; }
-.furniture-pixel-art { display:block; width:100%; aspect-ratio:1; background-image:url('/assets/pets/room-isometric-v2.png'); background-size:400% 400%; image-rendering:pixelated; }
+.furniture-pixel-art { display:block; width:100%; aspect-ratio:1; background-size:400% 400%; image-rendering:pixelated; }
+.shop-furniture-preview { display:block; width:94px; flex:0 0 94px; }
+.shop-material-preview { display:block; width:64px; height:64px; flex:0 0 64px; border-radius:12px; border:3px solid #ffffff; box-shadow:0 1px 5px #76583e22; }
+.room-inventory-preview { display:inline-block; width:54px; vertical-align:middle; }
+.room-theme-filter { display:flex; flex-wrap:wrap; gap:6px; }
+.room-theme-filter button { display:flex; align-items:center; gap:6px; padding:7px 10px; border:2px solid #eadfce; background:#fff9; border-radius:20px; font-size:11px; font-weight:800; cursor:pointer; }
+.room-theme-filter button[aria-pressed=true] { border-color:#d99c75; background:#ffeddf; }
+.room-theme-filter button > span { width:13px; height:13px; border-radius:50%; border:1px solid #0002; }
+.theme-preview-gallery { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; font-size:10px; text-align:center; }
 .is-editing .world-furniture { cursor:grab; touch-action:none; }
 .is-editing .world-furniture:active { cursor:grabbing; }
 .world-furniture.selected,.world-furniture:focus-visible { outline:2px dashed #9c6949; outline-offset:2px; border-radius:12px; }

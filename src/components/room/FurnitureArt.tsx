@@ -1,8 +1,17 @@
 import { FURNITURE_CELLS } from "./furnitureAtlas";
+import { ROOM_ATLASES } from "./roomAssetUrls";
 
 export function FurnitureArt({ id }: { id: string }) {
-  const cell=FURNITURE_CELLS[id];
-  if (cell !== undefined) return <span className="furniture-pixel-art" aria-hidden="true" style={{ backgroundPosition:`${cell%4*100/3}% ${Math.floor(cell/4)*100/3}%`, transform:id === "furniture_rug" ? "scaleY(.55)" : undefined, transformOrigin:"50% 76%" }} />;
+  const index=FURNITURE_CELLS[id];
+  const cell=index === undefined ? undefined : index>=48 ? index-48 : index%16;
+  const rows=index>=48 ? 2 : 4;
+  const atlas=index>=48 ? ROOM_ATLASES.garden : index>=32 ? ROOM_ATLASES.styles : index>=16 ? ROOM_ATLASES.themes : ROOM_ATLASES.base;
+  const cuts=[0,.271,.515,.75,1];
+  const row=cell===undefined ? 0 : Math.floor(cell/4);
+  const custom=index>=32 && index<48;
+  const height=custom ? cuts[row+1]-cuts[row] : 1/rows;
+  const top=custom ? cuts[row] : row/rows;
+  if (cell !== undefined) return <span className="furniture-pixel-art" aria-hidden="true" style={{ backgroundImage:`url('${atlas}')`,aspectRatio:custom?`${.25/height}`:undefined,backgroundSize:`400% ${100/height}%`,backgroundPosition:`${cell%4*100/3}% ${top/(1-height)*100}%`, transform:id === "furniture_rug" ? "scaleY(.55)" : undefined, transformOrigin:"50% 76%" }} />;
   // Wall decorations use the same warm palette as the raster furniture.
   let art;
   if (id === "decor_window") art = <><path d="m23 25 68-14v64L23 89Z" fill="#bce0e5" stroke="#a98061" strokeWidth="6" /><path d="m57 19v63M24 56l66-14" stroke="#fff2d5" strokeWidth="5" /><path d="m28 73 17-18 15 9 23-23v31Z" fill="#9ec29a" /></>;

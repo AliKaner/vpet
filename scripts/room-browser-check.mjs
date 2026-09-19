@@ -10,6 +10,7 @@ function send(method,params={}) { return new Promise((resolve,reject) => {const 
 async function evaluate(expression) {const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;}
 async function click(text) { await evaluate(`[...document.querySelectorAll('button')].find(b=>b.textContent==='${text}').click()`); await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))'); }
 await send('Runtime.enable');await send('Page.enable');
+await send('Network.enable');await send('Network.setCacheDisabled',{cacheDisabled:true});
 await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
 await send('Emulation.setDeviceMetricsOverride',{width:1050,height:1100,deviceScaleFactor:1,mobile:false});
 await send('Page.navigate',{url:'http://127.0.0.1:5178/room-preview.html'});
@@ -17,6 +18,9 @@ await evaluate(`new Promise(resolve=>{const t=setInterval(()=>{if(document.query
 assert.equal(await evaluate(`document.querySelectorAll('.world-pet').length`),2);
 assert.equal(await evaluate(`document.querySelectorAll('.world-furniture').length`),6);
 await click('Decorate');
+assert.equal(await evaluate(`document.querySelector('dialog').open`),true);
+await evaluate(`document.querySelector('[aria-label="Close decoration picker"]').click()`);
+await evaluate('new Promise(r=>requestAnimationFrame(r))');
 const before=await evaluate(`(()=>{const b=document.querySelector('[aria-label="Cat Tree"]');const r=b.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,left:b.style.left,top:b.style.top};})()`);
 await send('Input.dispatchMouseEvent',{type:'mousePressed',x:before.x,y:before.y,button:'left',clickCount:1});
 await evaluate('new Promise(r=>requestAnimationFrame(r))');
@@ -41,6 +45,36 @@ await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScal
 await evaluate('new Promise(r=>setTimeout(r,150))');
 assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'),false);
 await writeFile('node_modules/.tmp/room-mobile.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+const resources=await evaluate(`performance.getEntriesByType('resource').filter(e=>e.name.includes('/assets/room/')).map(e=>({name:e.name,type:e.initiatorType,start:e.startTime,duration:e.duration,bytes:e.encodedBodySize}))`);
+assert.equal(resources.length,4,'duplicate or missing room atlas requests');
+assert.ok(resources.every(r=>r.type==='link'),'room artwork was not preloaded by HTML');
+assert.ok(resources.reduce((sum,r)=>sum+r.bytes,0)<600000);
+assert.equal(await evaluate(`performance.getEntriesByType('resource').some(e=>e.name.includes('room-isometric-v2.png')||e.name.includes('room-themes-v1.png'))`),false);
+console.log('Cold-cache atlas requests:',JSON.stringify(resources));
+await send('Emulation.setDeviceMetricsOverride',{width:1050,height:1100,deviceScaleFactor:1,mobile:false});
+for(const [label,id] of [['Forest Cottage','forest'],['Seaside','seaside'],['Strawberry','strawberry'],['Midnight','midnight'],['Goth','goth'],['Disco','disco'],['Sweet Pink','pink'],['Purple Dream','purple'],['Cyberpunk','cyberpunk']]) {
+  await click(label);
+  assert.equal(await evaluate(`document.querySelectorAll('.world-furniture').length`),4);
+  assert.equal(await evaluate(`[...document.querySelectorAll('.world-furniture .furniture-pixel-art')].every(e=>e.style.backgroundImage.includes('.webp'))`),true);
+  await writeFile(`node_modules/.tmp/room-${id}.png`,Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+}
+await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'),false);
+await writeFile('node_modules/.tmp/room-theme-mobile.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+await click('Decorate');
+assert.equal(await evaluate(`document.querySelector('dialog').open`),true);
+assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'),false);
+await writeFile('node_modules/.tmp/room-picker-mobile.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+await click('Flower Garden Bench');
+assert.equal(await evaluate(`document.querySelector('dialog').open`),false);
+assert.equal(await evaluate(`document.querySelectorAll('.garden-furniture').length`),1);
+await click('Expand home · 80 coins');
+assert.equal(await evaluate(`document.querySelector('.room-house').style.width`),'83%');
+await click('Choose furniture');await click('Rose Pergola');
+assert.equal(await evaluate(`document.querySelectorAll('.garden-furniture').length`),2);
+await click('Done');
+await evaluate('new Promise(r=>setTimeout(r,400))');
+await writeFile('node_modules/.tmp/room-garden-mobile.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
 await send('Page.navigate',{url:'http://127.0.0.1:5178/animation-preview.html'});
 await evaluate(`new Promise(resolve=>{const t=setInterval(()=>{if(document.querySelector('select')){clearInterval(t);resolve(true);}},50);})`);
 await click('dog');await click('Black puppy');
@@ -49,5 +83,5 @@ await check();
 for(const pose of ['feed','pet','clean']) {await click(pose);await check();await evaluate(`new Promise(resolve=>{const t=setInterval(()=>{if(document.querySelector('[data-testid="playback-status"]').textContent==='Idle loop'){clearInterval(t);resolve(true);}},50);})`);await check();}
 for(const emotion of ['hungry','dirty','lonely','scared','happy']) {await evaluate(`(()=>{const s=document.querySelector('select');Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,'${emotion}');s.dispatchEvent(new Event('change',{bubbles:true}));})()`);await evaluate('new Promise(r=>requestAnimationFrame(r))');await check();}
 assert.deepEqual(errors,[]);
-console.log('PASS: two pets share scene; drag, keyboard move and flip; mobile overflow; black dog consistent atlas in all actions and moods; zero browser exceptions.');
+console.log('PASS: two pets; drag/keyboard/flip; nine collections; four early WebP requests under 600 KB; mobile picker and garden placement; home growth; black dog actions/moods; zero browser exceptions.');
 ws.close();

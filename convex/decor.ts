@@ -3,6 +3,8 @@ import { ConvexError, v } from "convex/values";
 import { getShopItem, isPlaceable } from "./lib/shopItems";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
+import { HOME_LEVELS, homeLevel } from "./lib/homeLevels";
+const areaValidator=v.union(v.literal("room"),v.literal("garden"));
 
 async function requireUserId(ctx: QueryCtx) {
   const userId = await getAuthUserId(ctx);
@@ -38,7 +40,7 @@ async function ownsItem(ctx: QueryCtx, ownerIds: Id<"users">[], itemId: string):
 
 export const getMyRoom = query({
   args: {},
-  returns: v.object({ wallpaperId: v.optional(v.string()), floorId: v.optional(v.string()), placedItemIds: v.array(v.string()), placements: v.array(v.object({ itemId: v.string(), x: v.optional(v.number()), y: v.optional(v.number()), flipped: v.optional(v.boolean()) })) }),
+  returns: v.object({ level:v.number(),wallpaperId: v.optional(v.string()), floorId: v.optional(v.string()), placedItemIds: v.array(v.string()), placements: v.array(v.object({ itemId: v.string(), x: v.optional(v.number()), y: v.optional(v.number()), flipped: v.optional(v.boolean()),area:v.optional(areaValidator) })) }),
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
     const roomKey = await getRoomKey(ctx, userId);
@@ -53,10 +55,11 @@ export const getMyRoom = query({
       .collect();
 
     return {
+      level:room?.level ?? 1,
       wallpaperId: room?.wallpaperId,
       floorId: room?.floorId,
       placedItemIds: placements.map((p) => p.itemId),
-      placements: placements.map(({ itemId, x, y, flipped }) => ({ itemId, x, y, flipped })),
+      placements: placements.map(({ itemId, x, y, flipped,area }) => ({ itemId, x, y, flipped,area })),
     };
   },
 });
@@ -102,8 +105,9 @@ export const getMyDecorInventory = query({
 });
 
 export const placeItem = mutation({
-  args: { itemId: v.string() },
-  handler: async (ctx, { itemId }) => {
+  args: { itemId: v.string(),area:v.optional(areaValidator) },
+  returns:v.null(),
+  handler: async (ctx, { itemId,area="room" }) => {
     const userId = await requireUserId(ctx);
     const item = getShopItem(itemId);
     if (item === undefined || !isPlaceable(item)) {
@@ -119,9 +123,35 @@ export const placeItem = mutation({
       .query("roomPlacements")
       .withIndex("by_room_item", (q) => q.eq("roomKey", roomKey).eq("itemId", itemId))
       .unique();
-    if (existing !== null) return;
+    if (existing !== null) return null;
+    const room=await ctx.db.query("rooms").withIndex("by_room",q=>q.eq("roomKey",roomKey)).unique();
+    const limits=homeLevel(room?.level);
+    const placements=await ctx.db.query("roomPlacements").withIndex("by_room",q=>q.eq("roomKey",roomKey)).take(100);
+    if(placements.filter(p=>(p.area ?? "room")===area).length>=limits[area==="room" ? "indoor" : "garden"]) throw new ConvexError("Upgrade your home to make more space.");
+    if(item.kind==="decor" && /window$|clock|poster|banner|streamers|disco/.test(item.id) && area==="garden") throw new ConvexError("Wall decorations belong inside.");
+    const count=placements.filter(p=>(p.area ?? "room")===area).length;
 
-    await ctx.db.insert("roomPlacements", { roomKey, itemId, placedAt: Date.now() });
+    await ctx.db.insert("roomPlacements", { roomKey,itemId,area,placedAt:Date.now(),x:20+(count%4)*20,y:20+Math.floor(count/4)%4*20 });
+    return null;
+  },
+});
+
+export const upgradeHome=mutation({
+  args:{expectedLevel:v.number()},returns:v.number(),
+  handler:async(ctx,{expectedLevel})=>{
+    const userId=await requireUserId(ctx);
+    const roomKey=await getRoomKey(ctx,userId);
+    const room=await ctx.db.query("rooms").withIndex("by_room",q=>q.eq("roomKey",roomKey)).unique();
+    const current=room?.level ?? 1;
+    if(current!==expectedLevel) throw new ConvexError("Your home has already changed. Check the new level.");
+    const next=HOME_LEVELS[current];
+    if(!next) throw new ConvexError("Your home is already at its largest size.");
+    const user=await ctx.db.get(userId);
+    if(!user || (user.coins ?? 0)<next.price) throw new ConvexError("Not enough coins to expand your home.");
+    await ctx.db.patch(userId,{coins:(user.coins ?? 0)-next.price});
+    if(room) await ctx.db.patch(room._id,{level:next.level});
+    else await ctx.db.insert("rooms",{roomKey,level:next.level});
+    return next.level;
   },
 });
 

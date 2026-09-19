@@ -1,3 +1,5 @@
+import { ROOM_THEMES, THEMED_FURNITURE_TYPES, THEME_LABELS, type RoomThemeId } from "./roomThemes";
+
 export interface ToyItem {
   id: string;
   kind: "toy";
@@ -27,6 +29,7 @@ export interface DecorItem {
 }
 
 export interface WallpaperItem {
+  theme?: RoomThemeId;
   id: string;
   kind: "wallpaper";
   label: string;
@@ -37,6 +40,7 @@ export interface WallpaperItem {
 }
 
 export interface FloorItem {
+  theme?: RoomThemeId;
   id: string;
   kind: "floor";
   label: string;
@@ -47,6 +51,8 @@ export interface FloorItem {
 }
 
 export interface FurnitureItem {
+  theme?: RoomThemeId;
+  outdoor?: boolean;
   id: string;
   kind: "furniture";
   label: string;
@@ -69,6 +75,19 @@ export function isRoomStyle(item: ShopItem): item is WallpaperItem | FloorItem {
 }
 
 export const SHOP_CATALOG: ShopItem[] = [
+  ...ROOM_THEMES.flatMap((theme): ShopItem[] => [
+    ...THEMED_FURNITURE_TYPES.map((type,index): FurnitureItem => ({
+      id:`furniture_${theme.id}_${type.id}`, kind:"furniture", theme:theme.id,
+      label:`${theme.label} ${THEME_LABELS[theme.id]?.[index] ?? type.label}`, icon:"🛋️",price:type.price,
+      description:`Part of the ${theme.label} collection. Mix colors or build a matching room.`,
+    })),
+    { id:`wallpaper_theme_${theme.id}`,kind:"wallpaper",theme:theme.id,label:`${theme.label} Walls`,icon:"🎨",price:40,description:`Patterned walls for the ${theme.label} collection.`,bgColor:theme.wall },
+    { id:`floor_theme_${theme.id}`,kind:"floor",theme:theme.id,label:`${theme.label} Floor`,icon:"🪵",price:35,description:`Coordinating flooring for the ${theme.label} collection.`,bgColor:theme.floor },
+  ]),
+  {id:"furniture_garden_bench",kind:"furniture",outdoor:true,label:"Flower Garden Bench",icon:"🌷",price:35,description:"A flower-framed seat for your garden."},
+  {id:"furniture_garden_arch",kind:"furniture",outdoor:true,label:"Rose Pergola",icon:"🌹",price:55,description:"A flowering entrance to your garden."},
+  {id:"furniture_garden_fountain",kind:"furniture",outdoor:true,label:"Garden Fountain",icon:"⛲",price:70,description:"A little stone fountain for your outdoor corner."},
+  {id:"furniture_garden_planter",kind:"furniture",outdoor:true,label:"Raised Flower Bed",icon:"🌻",price:25,description:"A colorful raised flower garden."},
   { id: "furniture_cat_tree", kind: "furniture", label: "Cat Tree", icon: "🐈", price: 65, description: "A climbing tower with a lavender lookout." },
   { id: "furniture_perch", kind: "furniture", label: "Bird Perch", icon: "🦜", price: 40, description: "A raised perch for a feathered roommate." },
   { id: "furniture_terrarium", kind: "furniture", label: "Glass Terrarium", icon: "🌿", price: 70, description: "A planted glass habitat for a quiet corner." },

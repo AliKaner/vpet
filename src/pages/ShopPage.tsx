@@ -3,6 +3,8 @@ import { useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { SHOP_CATALOG, type ShopItem } from "../../convex/lib/shopItems";
 import { ShopItemCard } from "../components/shop/ShopItemCard";
+import { ThemeFilter } from "../components/room/ThemeFilter";
+import type { RoomThemeId } from "../../convex/lib/roomThemes";
 
 const CATEGORIES: { id: ShopItem["kind"]; label: string }[] = [
   { id: "toy", label: "Toys" },
@@ -23,6 +25,7 @@ export function ShopPage() {
   // against this means the Shop only ever offers items the backend can actually sell.
   const supportedIds = useQuery(api.shop.getSupportedCatalogIds);
   const [filter, setFilter] = useState<ShopItem["kind"] | "all">("all");
+  const [theme,setTheme] = useState<RoomThemeId | "all">("all");
 
   if (
     inventory === undefined ||
@@ -35,7 +38,7 @@ export function ShopPage() {
   }
 
   const supportedIdSet = new Set(supportedIds);
-  const availableCatalog = SHOP_CATALOG.filter((item) => supportedIdSet.has(item.id));
+  const availableCatalog = SHOP_CATALOG.filter((item) => supportedIdSet.has(item.id) && (theme === "all" || ("theme" in item && item.theme === theme)));
   const ownedIds = new Set(inventory);
   // Decor/wallpaper/floor/furniture are shared with a partner, so anything either of
   // you bought counts as owned here (no reason to let it be bought twice).
@@ -55,7 +58,7 @@ export function ShopPage() {
       <div className="flex flex-wrap gap-1.5">
         <button
           type="button"
-          onClick={() => setFilter("all")}
+          onClick={() => {setFilter("all");setTheme("all");}}
           className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
             filter === "all" ? "bg-peach text-white" : "bg-white/70 text-cocoa-soft hover:bg-cream-dark"
           }`}
@@ -66,7 +69,7 @@ export function ShopPage() {
           <button
             key={category.id}
             type="button"
-            onClick={() => setFilter(category.id)}
+            onClick={() => {setFilter(category.id);setTheme("all");}}
             className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
               filter === category.id ? "bg-peach text-white" : "bg-white/70 text-cocoa-soft hover:bg-cream-dark"
             }`}
@@ -76,6 +79,8 @@ export function ShopPage() {
         ))}
       </div>
 
+      {(filter === "all" || filter === "furniture" || filter === "wallpaper" || filter === "floor") && <ThemeFilter value={theme} onChange={setTheme} />}
+      {availableCatalog.length === 0 && <p className="text-sm text-cocoa-soft">This collection is not available yet.</p>}
       {visibleCategories.map((category) => {
         const items = availableCatalog.filter((item) => item.kind === category.id);
         if (items.length === 0) return null;

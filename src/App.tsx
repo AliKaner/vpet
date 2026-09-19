@@ -14,7 +14,6 @@ import { LoginPage } from "./pages/LoginPage";
 import { PetCreatePage } from "./pages/PetCreatePage";
 import { PetHomePage } from "./pages/PetHomePage";
 import { PartnerPage } from "./pages/PartnerPage";
-import { RoomControls } from "./components/room/RoomControls";
 import { RoomScene } from "./components/room/RoomScene";
 import { ShopPage } from "./pages/ShopPage";
 import { SignupPage } from "./pages/SignupPage";
@@ -69,7 +68,6 @@ function HomeRoute() {
       </RoomScene>
       <div className="flex justify-center"><NewPetTile myPetsCount={myPetsCount} /></div>
       {partnerStatus?.paired && <PartnerChat />}
-      <RoomControls />
     </div>
   );
 }

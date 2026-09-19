@@ -137,6 +137,7 @@ export default defineSchema({
   // it, and either partner's purchased decor is placeable in it.
   rooms: defineTable({
     roomKey: v.string(),
+    level: v.optional(v.number()),
     wallpaperId: v.optional(v.string()),
     floorId: v.optional(v.string()),
   }).index("by_room", ["roomKey"]),
@@ -148,6 +149,7 @@ export default defineSchema({
     x: v.optional(v.number()),
     y: v.optional(v.number()),
     flipped: v.optional(v.boolean()),
+    area: v.optional(v.union(v.literal("room"),v.literal("garden"))),
   })
     .index("by_room", ["roomKey"])
     .index("by_room_item", ["roomKey", "itemId"]),
