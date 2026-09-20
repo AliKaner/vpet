@@ -7,13 +7,18 @@ import { SHOP_CATALOG } from "../../convex/lib/shopItems";
 import "../index.css";
 type State=ComponentProps<typeof ActivitiesView>["state"];
 export function Preview() {
-  const [state,setState]=useState<State>(()=>({coins:100,dailyClaimed:false,memoryWins:0,shiftsPaid:0,shiftReadyAt:null,gameId:0,cards:[],matched:[],turn:0,resetAt:0,active:false,expiresAt:0,serverNow:Date.now()}));
+  const [state,setState]=useState<State>(()=>({coins:100,dailyClaimed:false,memoryWins:0,shiftsPaid:0,shiftReadyAt:null,gameId:0,cards:[],matched:[],turn:0,resetAt:0,active:false,expiresAt:0,
+    simonWins:0,simonRoundId:0,simonSequence:null,simonStep:0,simonActive:false,quizWins:0,quizRoundId:0,quizSpecies:null,quizOptions:null,serverNow:Date.now()}));
   return <main style={{maxWidth:680,margin:"auto",padding:16}}><ActivitiesView state={state} act={async action=>{
     if(action==="daily") {setState(p=>({...p,dailyClaimed:true,coins:p.coins+15}));return 15;}
     if(action==="startShift") {setState(p=>({...p,shiftReadyAt:Date.now()+120000}));return null;}
     if(action==="claimShift") {setState(p=>({...p,shiftReadyAt:null,shiftsPaid:p.shiftsPaid+1,coins:p.coins+25}));return 25;}
     setState(p=>({...p,gameId:p.gameId+1,cards:Array(12).fill(null),matched:[],active:true,expiresAt:Date.now()+900000}));return null;
-  }} flip={async index=>{setState(p=>({...p,cards:p.cards.map((v,i)=>i===index?Math.floor(i/2):v)}));return 0;}}/>
+  }} flip={async index=>{setState(p=>({...p,cards:p.cards.map((v,i)=>i===index?Math.floor(i/2):v)}));return 0;}}
+  startSimon={async()=>{setState(p=>({...p,simonRoundId:p.simonRoundId+1,simonSequence:[0,1,2,1,3],simonStep:0,simonActive:true}));return null;}}
+  tapSimon={async index=>{const correct=index===0;setState(p=>({...p,simonActive:false,simonWins:correct?p.simonWins+1:p.simonWins,coins:correct?p.coins+25:p.coins}));return {correct,done:true,reward:correct?25:0};}}
+  startQuiz={async()=>{setState(p=>({...p,quizRoundId:p.quizRoundId+1,quizSpecies:"cat",quizOptions:["✋","🦴","🎵","🤚"]}));return null;}}
+  answerQuiz={async index=>{const correct=index===0;setState(p=>({...p,quizSpecies:null,quizOptions:null,quizWins:correct?p.quizWins+1:p.quizWins,coins:correct?p.coins+15:p.coins}));return correct?15:0;}}/>
   <h2 style={{fontSize:24,fontWeight:800,marginTop:24}}>Decoration Shop · Preview</h2><div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:16}}>{SHOP_CATALOG.filter(i=>i.kind==="furniture"&&["lounge","bedroom","bathroom","accents"].includes(i.collection??"")).map(item=><div key={item.id} className="shop-decoration-card rounded-cozy bg-white/70 p-4"><div className="shop-item-heading flex"><FurniturePreview item={item}/><strong>{item.label}</strong></div><p>{item.price} coins</p></div>)}</div></main>;
 }
 createRoot(document.getElementById("root")!).render(<BrowserRouter><Preview/></BrowserRouter>);

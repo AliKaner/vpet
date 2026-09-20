@@ -22,6 +22,13 @@ export default defineSchema({
     ownerId:v.id("users"),day:v.string(),dailyClaimed:v.boolean(),memoryWins:v.number(),shiftsPaid:v.number(),
     shiftReadyAt:v.optional(v.number()),gameId:v.number(),board:v.array(v.number()),matched:v.array(v.number()),
     faceUp:v.array(v.number()),turn:v.number(),resetAt:v.number(),active:v.boolean(),expiresAt:v.number(),
+    // Pattern Paws: watch-then-repeat sequence game.
+    simonSequence:v.optional(v.array(v.number())),simonStep:v.optional(v.number()),
+    simonActive:v.optional(v.boolean()),simonRoundId:v.optional(v.number()),simonWins:v.optional(v.number()),
+    // Species Quiz: "what does this pet love to do" multiple choice. quizAnswerIndex
+    // is never returned by getState - it's the server-only secret for the round.
+    quizSpecies:v.optional(v.string()),quizAnswerIndex:v.optional(v.number()),
+    quizOptions:v.optional(v.array(v.string())),quizRoundId:v.optional(v.number()),quizWins:v.optional(v.number()),
   }).index("by_owner",["ownerId"]),
 
   users: defineTable({

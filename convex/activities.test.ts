@@ -75,3 +75,44 @@ test("mismatches wait before flipping and expired boards can restart",async()=>{
   await user.mutation(api.activities.startMemory);
   expect((await user.query(api.activities.getState)).gameId).toBe(2);
 });
+test("pattern paws reveals the sequence, rejects wrong taps/stale rounds and caps daily wins",async()=>{
+  const {t,id,user,other}=await setup();
+  for(let round=0;round<4;round++) {
+    await user.mutation(api.activities.startSimon);
+    const state=await user.query(api.activities.getState);
+    expect(state.simonSequence).toHaveLength(5);
+    const sequence=state.simonSequence!;
+    await expect(other.mutation(api.activities.submitSimonTap,{roundId:state.simonRoundId,step:0,index:sequence[0]})).rejects.toThrow();
+    await expect(user.mutation(api.activities.submitSimonTap,{roundId:state.simonRoundId,step:1,index:sequence[0]})).rejects.toThrow("changed");
+    for(let step=0;step<5;step++) {
+      const result=await user.mutation(api.activities.submitSimonTap,{roundId:state.simonRoundId,step,index:sequence[step]});
+      expect(result.correct).toBe(true);
+      expect(result.done).toBe(step===4);
+    }
+    expect((await user.query(api.activities.getState)).coins).toBe(25*(round+1));
+  }
+  await expect(user.mutation(api.activities.startSimon)).rejects.toThrow("rewards earned");
+  // A wrong tap ends the round with no reward, without touching the daily cap.
+  const finalP=await t.run(ctx=>ctx.db.query("activities").withIndex("by_owner",q=>q.eq("ownerId",id)).unique());
+  expect(finalP!.simonWins).toBe(4);
+});
+test("species quiz keeps the answer secret server-side, pays once per correct guess and caps daily wins",async()=>{
+  const {t,id,user}=await setup();
+  await user.mutation(api.activities.startQuiz);
+  const state=await user.query(api.activities.getState);
+  expect(state.quizOptions).toHaveLength(4);
+  expect(state.quizSpecies).not.toBeNull();
+  const p=await t.run(ctx=>ctx.db.query("activities").withIndex("by_owner",q=>q.eq("ownerId",id)).unique());
+  const wrongIndex=(p!.quizAnswerIndex!+1)%4;
+  await expect(user.mutation(api.activities.submitQuizAnswer,{roundId:state.quizRoundId,choiceIndex:wrongIndex})).resolves.toBe(0);
+  expect((await user.query(api.activities.getState)).coins).toBe(0);
+  await expect(user.mutation(api.activities.submitQuizAnswer,{roundId:state.quizRoundId,choiceIndex:0})).rejects.toThrow("changed");
+  for(let round=0;round<6;round++) {
+    await user.mutation(api.activities.startQuiz);
+    const round_=await user.query(api.activities.getState);
+    const answerIndex=(await t.run(ctx=>ctx.db.query("activities").withIndex("by_owner",q=>q.eq("ownerId",id)).unique()))!.quizAnswerIndex!;
+    await user.mutation(api.activities.submitQuizAnswer,{roundId:round_.quizRoundId,choiceIndex:answerIndex});
+  }
+  expect((await user.query(api.activities.getState)).coins).toBe(15*6);
+  await expect(user.mutation(api.activities.startQuiz)).rejects.toThrow("rewards earned");
+});
