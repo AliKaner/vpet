@@ -10,6 +10,7 @@
 
 import type * as achievements from "../achievements.js";
 import type * as activities from "../activities.js";
+import type * as assets from "../assets.js";
 import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
 import type * as decor from "../decor.js";
@@ -26,6 +27,7 @@ import type * as lib_homeLevels from "../lib/homeLevels.js";
 import type * as lib_petAppearances from "../lib/petAppearances.js";
 import type * as lib_petMath from "../lib/petMath.js";
 import type * as lib_roomThemes from "../lib/roomThemes.js";
+import type * as lib_roomTiles from "../lib/roomTiles.js";
 import type * as lib_shopItems from "../lib/shopItems.js";
 import type * as lib_species from "../lib/species.js";
 import type * as memorials from "../memorials.js";
@@ -44,6 +46,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   achievements: typeof achievements;
   activities: typeof activities;
+  assets: typeof assets;
   auth: typeof auth;
   crons: typeof crons;
   decor: typeof decor;
@@ -60,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   "lib/petAppearances": typeof lib_petAppearances;
   "lib/petMath": typeof lib_petMath;
   "lib/roomThemes": typeof lib_roomThemes;
+  "lib/roomTiles": typeof lib_roomTiles;
   "lib/shopItems": typeof lib_shopItems;
   "lib/species": typeof lib_species;
   memorials: typeof memorials;

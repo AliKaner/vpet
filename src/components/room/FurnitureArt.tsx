@@ -1,5 +1,6 @@
 import { FURNITURE_CELLS } from "./furnitureAtlas";
 import { ROOM_ATLASES } from "./roomAssetUrls";
+import { gameAssetUrl } from "../../lib/gameAssets";
 
 export function FurnitureArt({ id }: { id: string }) {
   const index=FURNITURE_CELLS[id];
@@ -8,7 +9,7 @@ export function FurnitureArt({ id }: { id: string }) {
     const atlases=[ROOM_ATLASES.essentials,ROOM_ATLASES.studio,ROOM_ATLASES.nature,ROOM_ATLASES.enchanted,ROOM_ATLASES.workshop];
     const cuts=[[0,.27,.505,.749,1],[0,.253,.505,.733,1],[0,.26,.51,.723,1],[0,.29,.52,.71,1],[0,.5,1]][group];
     const height=cuts[row+1]-cuts[row],top=cuts[row],cellWidth=.25;
-    return <span className="furniture-pixel-art" aria-hidden="true" style={{backgroundImage:`url('${atlases[group]}')`,aspectRatio:group===4?"1":`${cellWidth/height}`,backgroundSize:`400% ${100/height}%`,backgroundPosition:`${cell%4*100/3}% ${top/(1-height)*100}%`}}/>;
+    return <span className="furniture-pixel-art" aria-hidden="true" style={{backgroundImage:`url('${gameAssetUrl(atlases[group])}')`,aspectRatio:group===4?"1":`${cellWidth/height}`,backgroundSize:`400% ${100/height}%`,backgroundPosition:`${cell%4*100/3}% ${top/(1-height)*100}%`}}/>;
   }
   const cell=index === undefined ? undefined : index>=56 ? (index-56)%16 : index>=48 ? index-48 : index%16;
   const rows=index>=48 && index<56 ? 2 : 4;
@@ -18,7 +19,7 @@ export function FurnitureArt({ id }: { id: string }) {
   const custom=(index>=32 && index<48) || index>=56;
   const height=custom ? cuts[row+1]-cuts[row] : 1/rows;
   const top=custom ? cuts[row] : row/rows;
-  if (cell !== undefined) return <span className="furniture-pixel-art" aria-hidden="true" style={{ backgroundImage:`url('${atlas}')`,aspectRatio:custom?`${.25/height}`:undefined,backgroundSize:`400% ${100/height}%`,backgroundPosition:`${cell%4*100/3}% ${top/(1-height)*100}%`,clipPath:index===81?"inset(0 0 0 6%)":undefined, transform:id === "furniture_rug" ? "scaleY(.55)" : undefined, transformOrigin:"50% 76%" }} />;
+  if (cell !== undefined) return <span className="furniture-pixel-art" aria-hidden="true" style={{ backgroundImage:`url('${gameAssetUrl(atlas)}')`,aspectRatio:custom?`${.25/height}`:undefined,backgroundSize:`400% ${100/height}%`,backgroundPosition:`${cell%4*100/3}% ${top/(1-height)*100}%`,clipPath:index===81?"inset(0 0 0 6%)":undefined, transform:id === "furniture_rug" ? "scaleY(.55)" : undefined, transformOrigin:"50% 76%" }} />;
   // Wall decorations use the same warm palette as the raster furniture.
   let art;
   if (id === "decor_window") art = <><path d="m23 25 68-14v64L23 89Z" fill="#bce0e5" stroke="#a98061" strokeWidth="6" /><path d="m57 19v63M24 56l66-14" stroke="#fff2d5" strokeWidth="5" /><path d="m28 73 17-18 15 9 23-23v31Z" fill="#9ec29a" /></>;

@@ -4,6 +4,7 @@ import { appearanceDetails, resolveAppearance } from "../../../convex/lib/petApp
 import { sampleAnimation, type AnimationPose } from "../../lib/petAnimation";
 import type { PetEmotion } from "../../lib/petEmotion";
 import { getShopItem } from "../../../convex/lib/shopItems";
+import { gameAssetUrl } from "../../lib/gameAssets";
 export type PetPose = AnimationPose;
 const EMOTION_PAIR: Record<PetEmotion, number> = { hungry: 0, dirty: 2, lonely: 4, scared: 6, happy: 8, content: 10 };
 const SPECIES_ROW: Record<SpeciesId, number> = { cat: 0, dog: 2, bird: 4, snake: 0, mouse: 2, horse: 4 };
@@ -19,7 +20,7 @@ export function PetSprite({ species, appearance, clothingId, pose = "idle", emot
   const midnightDog = species === "dog" && look === "midnight";
   const generated = (species === "cat" && look === "silver") || (species === "dog" && look === "chocolate") || (species === "bird" && look === "sunny");
   const group = generated ? "variants" : (["cat", "dog", "bird"].includes(species) ? "companions" : "small-friends");
-  const source = midnightDog ? "/assets/pets/animations/dog-midnight.png" : emotionalIdle ? `/assets/pets/animations/moods-${group}.png` : `/assets/pets/animations/${species}-${generated ? look : "classic"}.png`;
+  const source = gameAssetUrl(midnightDog ? "/assets/pets/animations/dog-midnight.png" : emotionalIdle ? `/assets/pets/animations/moods-${group}.png` : `/assets/pets/animations/${species}-${generated ? look : "classic"}.png`);
   const columns = midnightDog ? 4 : emotionalIdle ? 6 : 4;
   const rows = midnightDog ? 7 : columns;
   const base = emotionalIdle ? (midnightDog ? 16 : SPECIES_ROW[species] * 6) + EMOTION_PAIR[emotion] : 0;

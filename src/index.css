@@ -120,9 +120,9 @@ body {
 @keyframes pet-worry { 50% { transform: translateY(3px) rotate(-3deg); } }
 @media (hover: hover) and (pointer: fine) {
   .pet-sound-toggle { display: block; cursor: pointer; }
-  .pet-cursor-feed { cursor: url('/assets/pets/cursor-feed.svg') 12 12, pointer; }
+  .pet-cursor-feed { cursor: var(--pet-cursor-feed,pointer); }
   .pet-cursor-pet { cursor: grab; }
-  .pet-cursor-clean { cursor: url('/assets/pets/cursor-clean.svg') 12 12, pointer; }
+  .pet-cursor-clean { cursor: var(--pet-cursor-clean,pointer); }
 }
 @media (prefers-reduced-motion: reduce) {
   .pet-actor { animation: none !important; }

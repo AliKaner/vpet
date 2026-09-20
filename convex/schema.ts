@@ -17,6 +17,7 @@ const progressValidator = v.object({
 
 export default defineSchema({
   ...authTables,
+  gameAssets:defineTable({path:v.string(),storageId:v.id("_storage"),sha256:v.string(),size:v.number()}).index("by_path",["path"]),
   activities: defineTable({
     ownerId:v.id("users"),day:v.string(),dailyClaimed:v.boolean(),memoryWins:v.number(),shiftsPaid:v.number(),
     shiftReadyAt:v.optional(v.number()),gameId:v.number(),board:v.array(v.number()),matched:v.array(v.number()),
@@ -142,6 +143,8 @@ export default defineSchema({
   // it, and either partner's purchased decor is placeable in it.
   rooms: defineTable({
     roomKey: v.string(),
+    tiles:v.optional(v.array(v.object({x:v.number(),y:v.number()}))),
+    tilePurchases:v.optional(v.number()),
     level: v.optional(v.number()),
     wallpaperId: v.optional(v.string()),
     floorId: v.optional(v.string()),
@@ -154,6 +157,8 @@ export default defineSchema({
     x: v.optional(v.number()),
     y: v.optional(v.number()),
     flipped: v.optional(v.boolean()),
+    tileX:v.optional(v.number()),
+    tileY:v.optional(v.number()),
     area: v.optional(v.union(v.literal("room"),v.literal("garden"))),
   })
     .index("by_room", ["roomKey"])
