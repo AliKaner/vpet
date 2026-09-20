@@ -58,11 +58,11 @@ export function ShopPage() {
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex gap-1.5 overflow-x-auto pb-1">
         <button
           type="button"
           onClick={() => {setFilter("all");setTheme("all");setCollection("all");}}
-          className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition ${
             filter === "all" ? "bg-peach text-white" : "bg-white/70 text-cocoa-soft hover:bg-cream-dark"
           }`}
         >
@@ -73,7 +73,7 @@ export function ShopPage() {
             key={category.id}
             type="button"
             onClick={() => {setFilter(category.id);setTheme("all");setCollection("all");}}
-            className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold transition ${
               filter === category.id ? "bg-peach text-white" : "bg-white/70 text-cocoa-soft hover:bg-cream-dark"
             }`}
           >

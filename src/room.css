@@ -51,8 +51,8 @@
 .shop-decoration-card .shop-furniture-preview { width:100%; height:190px; flex:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .shop-decoration-card .shop-furniture-preview .furniture-pixel-art,.shop-decoration-card .shop-furniture-preview .furniture-art { width:170px; max-height:170px; }
 .shop-decoration-card > button { margin-top:auto; }
-.furniture-set-filter { display:flex; align-items:center; gap:10px; font-size:12px; font-weight:700; }
-.furniture-set-filter select { padding:10px; border:1px solid #decfbf; border-radius:12px; background:#fffaf3; max-width:100%; }
+.furniture-set-filter { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:12px; font-weight:700; }
+.furniture-set-filter select { flex:1; min-width:0; padding:10px; border:1px solid #decfbf; border-radius:12px; background:#fffaf3; max-width:100%; }
 .shop-furniture-preview { cursor:zoom-in; background:radial-gradient(ellipse,#e7e8da,transparent 72%); border-radius:12px; }
 .shop-furniture-preview small { display:block; font-size:10px; color:#86664f; }
 .furniture-detail-preview { width:min(100%,360px); margin:auto; background:radial-gradient(ellipse at 50% 75%,#dce5d1,transparent 65%); }
@@ -117,8 +117,8 @@
 .shop-toy-clothing-preview { display:block; width:64px; flex:0 0 64px; }
 .shop-toy-clothing-preview .furniture-art { width:100%; overflow:visible; }
 .room-inventory-preview { display:inline-block; width:54px; vertical-align:middle; }
-.room-theme-filter { display:flex; flex-wrap:wrap; gap:6px; }
-.room-theme-filter button { display:flex; align-items:center; gap:6px; padding:7px 10px; border:2px solid #eadfce; background:#fff9; border-radius:20px; font-size:11px; font-weight:800; cursor:pointer; }
+.room-theme-filter { display:flex; flex-wrap:nowrap; gap:6px; overflow-x:auto; padding-bottom:2px; -webkit-overflow-scrolling:touch; scrollbar-width:thin; }
+.room-theme-filter button { flex:0 0 auto; display:flex; align-items:center; gap:6px; padding:7px 10px; border:2px solid #eadfce; background:#fff9; border-radius:20px; font-size:11px; font-weight:800; cursor:pointer; }
 .room-theme-filter button[aria-pressed=true] { border-color:#d99c75; background:#ffeddf; }
 .room-theme-filter button > span { width:13px; height:13px; border-radius:50%; border:1px solid #0002; }
 .theme-preview-gallery { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; font-size:10px; text-align:center; }
