@@ -31,7 +31,7 @@ test("tiles extend the shared floor, charge the buyer and reject stale or discon
   await b.mutation(api.decor.buyTile,{x:5,y:1,expectedPurchases:1});
   expect((await b.query(api.users.getMyProfile)).coins).toBe(1000-tilePrice(1));
   expect((await c.query(api.decor.getMyRoom)).tiles).toHaveLength(16);
-  expect(tilePrice(30)).toBeGreaterThan(800000);
+  expect(tilePrice(30)).toBe(3000);
 });
 test("legacy furniture stays in place and can move onto a bought tile, never empty ground",async()=>{
   const {a,b}=await setup();
@@ -63,7 +63,7 @@ test("garden and house purchases persist separate ground and protect occupied gr
   expect(converted.gardenTiles).not.toContainEqual({x,y});
   expect(converted.gardenPurchases).toBe(1);
   await expect(a.mutation(api.decor.buyTile,{x:-1,y:0,area:"garden",expectedPurchases:2})).rejects.toThrow();
-  expect((await a.query(api.users.getMyProfile)).coins).toBe(760);
+  expect((await a.query(api.users.getMyProfile)).coins).toBe(780);
 });
 
 test("camera fits irregular floors and round-trips coordinates at a shared scale",()=>{

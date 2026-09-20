@@ -1,14 +1,19 @@
 export type RoomTile={x:number;y:number};
 export const BASE_TILES:RoomTile[]=Array.from({length:16},(_,i)=>({x:i%4,y:Math.floor(i/4)}));
-export const MAX_TILES=80;
+export const MAX_TILES=3200;
 export const tileKey=({x,y}:RoomTile)=>`${x},${y}`;
-export const tilePrice=(purchased:number)=>Math.min(1_000_000_000,Math.ceil(100*Math.pow(1.35,purchased)/10)*10);
+// Gentler growth than before (12% vs. the old 35% per tile) so the price curve
+// actually spans a meaningful chunk of the much higher MAX_TILES instead of
+// hitting the 1B cap almost immediately - reaches the cap around tile #142.
+export const tilePrice=(purchased:number)=>Math.min(1_000_000_000,Math.ceil(100*Math.pow(1.12,purchased)/10)*10);
 export const defaultGardenTiles=(home:RoomTile[])=>availableTiles(home).filter(t=>t.x>=4||t.y>=4);
+// Bounding box sized to comfortably fit MAX_TILES (60x60=3600 cells >= 3200).
+const BOUND_MIN=-28,BOUND_MAX=32;
 export function availableTiles(tiles:RoomTile[]) {
   const occupied=new Set(tiles.map(tileKey)),candidates=new Map<string,RoomTile>();
   for(const tile of tiles) for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
     const next={x:tile.x+dx,y:tile.y+dy};
-    if(next.x>=-8&&next.y>=-8&&next.x<12&&next.y<12&&!occupied.has(tileKey(next))) candidates.set(tileKey(next),next);
+    if(next.x>=BOUND_MIN&&next.y>=BOUND_MIN&&next.x<BOUND_MAX&&next.y<BOUND_MAX&&!occupied.has(tileKey(next))) candidates.set(tileKey(next),next);
   }
   return tiles.length>=MAX_TILES?[]:[...candidates.values()];
 }

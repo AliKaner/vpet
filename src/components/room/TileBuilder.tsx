@@ -5,7 +5,9 @@ export function TileBuilder({tiles,gardenTiles,area,disabled,onBuy}:{tiles:RoomT
   return <svg className={`tile-builder tile-builder-${area}`} viewBox="0 0 100 100" preserveAspectRatio="none" aria-label={`Buy ${area} tiles with one click`}>
     {candidates.map(({x,y})=>{
       const points=[[x,y],[x+1,y],[x+1,y+1],[x,y+1]].map(([u,v])=>{const p=g.project(u,v);return `${p.left},${p.top}`;}).join(" ");
-      return <polygon key={tileKey({x,y})} points={points} role="button" tabIndex={disabled?-1:0} aria-label={`Buy ${area} tile ${x}, ${y}`} aria-disabled={disabled} onClick={()=>{if(!disabled)onBuy({x,y});}} onKeyDown={e=>{if(!disabled&&(e.key==="Enter"||e.key===" ")){e.preventDefault();onBuy({x,y});}}}/>;
+      const converts=area==="room"&&gardenTiles.some(t=>t.x===x&&t.y===y);
+      const label=converts?`Convert garden tile ${x}, ${y} to house floor`:`Buy ${area} tile ${x}, ${y}`;
+      return <polygon key={tileKey({x,y})} points={points} className={converts?"is-conversion":undefined} role="button" tabIndex={disabled?-1:0} aria-label={label} aria-disabled={disabled} onClick={()=>{if(!disabled)onBuy({x,y});}} onKeyDown={e=>{if(!disabled&&(e.key==="Enter"||e.key===" ")){e.preventDefault();onBuy({x,y});}}}/>;
     })}
   </svg>;
 }

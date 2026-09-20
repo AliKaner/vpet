@@ -31,6 +31,8 @@
 .tile-builder { position:absolute; inset:0; width:100%; height:100%; overflow:visible; z-index:250; pointer-events:none; }
 .tile-builder polygon { pointer-events:all; fill:#e6c67c66; stroke:#9b7842; stroke-width:.35; stroke-dasharray:1 .5; cursor:pointer; }
 .tile-builder polygon:hover,.tile-builder polygon:focus-visible,.tile-builder polygon[aria-pressed=true] { fill:#91c59bbb; stroke:#346c44; outline:none; }
+.tile-builder polygon.is-conversion { fill:#f2b0d488; stroke:#c06ea0; stroke-dasharray:.6 .3; }
+.tile-builder polygon.is-conversion:hover,.tile-builder polygon.is-conversion:focus-visible { fill:#f2a1c8bb; stroke:#a8447f; }
 .tile-build-controls { display:flex; flex-direction:column; gap:8px; padding:14px; border-radius:16px; background:#f4e5c4; font-size:12px; }
 .tile-build-controls button { align-self:flex-start; padding:10px 16px; background:#d6e8c3; border-radius:12px; font-weight:800; cursor:pointer; }.tile-build-controls button:disabled { opacity:.5; cursor:default; }
 .activities-page { display:flex; flex-direction:column; gap:22px; padding:24px 0; color:#604e43; }
