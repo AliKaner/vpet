@@ -4,7 +4,7 @@ import { getShopItem, isPlaceable, isWallFurniture } from "./lib/shopItems";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { HOME_LEVELS, homeLevel } from "./lib/homeLevels";
-import { BASE_TILES,MAX_TILES,availableTiles,onRoomTile,tilePrice } from "./lib/roomTiles";
+import { BASE_TILES,MAX_TILES,defaultGardenTiles,availableTiles,onRoomTile,tilePrice } from "./lib/roomTiles";
 const areaValidator=v.union(v.literal("room"),v.literal("garden"));
 
 async function requireUserId(ctx: QueryCtx) {
@@ -41,7 +41,7 @@ async function ownsItem(ctx: QueryCtx, ownerIds: Id<"users">[], itemId: string):
 
 export const getMyRoom = query({
   args: {},
-  returns: v.object({ level:v.number(),tiles:v.array(v.object({x:v.number(),y:v.number()})),tilePurchases:v.number(),wallpaperId: v.optional(v.string()), floorId: v.optional(v.string()), placedItemIds: v.array(v.string()), placements: v.array(v.object({ itemId: v.string(), x: v.optional(v.number()), y: v.optional(v.number()),tileX:v.optional(v.number()),tileY:v.optional(v.number()), flipped: v.optional(v.boolean()),area:v.optional(areaValidator) })) }),
+  returns: v.object({ level:v.number(),tiles:v.array(v.object({x:v.number(),y:v.number()})),tilePurchases:v.number(),gardenTiles:v.array(v.object({x:v.number(),y:v.number()})),gardenPurchases:v.number(),wallpaperId: v.optional(v.string()), floorId: v.optional(v.string()), placedItemIds: v.array(v.string()), placements: v.array(v.object({ itemId: v.string(), x: v.optional(v.number()), y: v.optional(v.number()),tileX:v.optional(v.number()),tileY:v.optional(v.number()), flipped: v.optional(v.boolean()),area:v.optional(areaValidator) })) }),
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
     const roomKey = await getRoomKey(ctx, userId);
@@ -58,6 +58,7 @@ export const getMyRoom = query({
     return {
       level:room?.level ?? 1,
       tiles:room?.tiles??BASE_TILES,tilePurchases:room?.tilePurchases??0,
+      gardenTiles:room?.gardenTiles??defaultGardenTiles(room?.tiles??BASE_TILES),gardenPurchases:room?.gardenPurchases??0,
       wallpaperId: room?.wallpaperId,
       floorId: room?.floorId,
       placedItemIds: placements.map((p) => p.itemId),
@@ -76,9 +77,10 @@ export const moveItem = mutation({
     const row = await ctx.db.query("roomPlacements").withIndex("by_room_item", (q) => q.eq("roomKey", roomKey).eq("itemId", itemId)).unique();
     if (!row) throw new ConvexError("Place this item first.");
     if (!(await ownsItem(ctx, await getHouseholdOwnerIds(ctx, userId), itemId))) throw new ConvexError("Your household doesn't own this item.");
-    if(grid && row.area!=="garden") {
+    if(grid) {
       const room=await ctx.db.query("rooms").withIndex("by_room",q=>q.eq("roomKey",roomKey)).unique();
-      if(!onRoomTile(room?.tiles??BASE_TILES,x/25,y/25)) throw new ConvexError("Buy this floor tile before placing furniture on it.");
+      const home=room?.tiles??BASE_TILES;
+      if(!onRoomTile(row.area==="garden"?(room?.gardenTiles??defaultGardenTiles(home)):home,x/25,y/25)) throw new ConvexError("Buy this floor tile before placing furniture on it.");
       await ctx.db.patch(row._id,{tileX:x/25,tileY:y/25,flipped});return null;
     }
     if(![x,y].every(n=>n>=8&&n<=92)) throw new ConvexError("Keep furniture inside the room.");
@@ -135,12 +137,15 @@ export const placeItem = mutation({
     const room=await ctx.db.query("rooms").withIndex("by_room",q=>q.eq("roomKey",roomKey)).unique();
     const limits=homeLevel(room?.level);
     const placements=await ctx.db.query("roomPlacements").withIndex("by_room",q=>q.eq("roomKey",roomKey)).take(201);
-    const capacity=area==="room"?limits.indoor+(room?.tilePurchases??0)*2:limits.garden;
+    const capacity=area==="room"?limits.indoor+((room?.tilePurchases??0)-(room?.gardenPurchases??0))*2:limits.garden+(room?.gardenPurchases??0)*2;
     if(placements.filter(p=>(p.area ?? "room")===area).length>=capacity) throw new ConvexError("Upgrade your home to make more space.");
     if(isWallFurniture(item.id) && area==="garden") throw new ConvexError("Wall decorations belong inside.");
     const count=placements.filter(p=>(p.area ?? "room")===area).length;
 
-    await ctx.db.insert("roomPlacements", { roomKey,itemId,area,placedAt:Date.now(),x:20+(count%4)*20,y:20+Math.floor(count/4)%4*20 });
+    const grass=room?.gardenTiles??defaultGardenTiles(room?.tiles??BASE_TILES);
+    if(area==="garden"&&!grass.length) throw new ConvexError("Add a garden grass tile first.");
+    const gardenTile=grass[count%grass.length];
+    await ctx.db.insert("roomPlacements", { roomKey,itemId,area,placedAt:Date.now(),x:20+(count%4)*20,y:20+Math.floor(count/4)%4*20,...(area==="garden"?{tileX:gardenTile.x+.5,tileY:gardenTile.y+.5}:{}) });
     return null;
   },
 });
@@ -165,18 +170,27 @@ export const upgradeHome=mutation({
 });
 
 export const buyTile=mutation({
-  args:{x:v.number(),y:v.number(),expectedPurchases:v.number()},returns:v.number(),
-  handler:async(ctx,{x,y,expectedPurchases})=>{
+  args:{x:v.number(),y:v.number(),expectedPurchases:v.number(),area:v.optional(areaValidator)},returns:v.number(),
+  handler:async(ctx,{x,y,expectedPurchases,area="room"})=>{
     const userId=await requireUserId(ctx),roomKey=await getRoomKey(ctx,userId);
     const room=await ctx.db.query("rooms").withIndex("by_room",q=>q.eq("roomKey",roomKey)).unique();
     const tiles=room?.tiles??BASE_TILES,purchases=room?.tilePurchases??0;
     if(expectedPurchases!==purchases) throw new ConvexError("Your room changed. Check the updated tile price.");
-    if(tiles.length>=MAX_TILES) throw new ConvexError("Your plot is fully built.");
-    if(!Number.isInteger(x)||!Number.isInteger(y)||!availableTiles(tiles).some(t=>t.x===x&&t.y===y)) throw new ConvexError("Choose an empty tile beside your existing floor.");
+    const garden=room?.gardenTiles??defaultGardenTiles(tiles),plot=[...tiles,...garden];
+    const conversion=area==="room"&&garden.some(t=>t.x===x&&t.y===y);
+    const placed=await ctx.db.query("roomPlacements").withIndex("by_room",q=>q.eq("roomKey",roomKey)).take(501);
+    for(const item of placed.filter(p=>p.area==="garden")) {
+      const legacy=garden[Math.min(garden.length-1,Math.floor((item.x??50)/100*garden.length))];
+      const tx=item.tileX??(legacy?legacy.x+.5:0),ty=item.tileY??(legacy?legacy.y+.5:0);
+      if(conversion&&Math.floor(tx)===x&&Math.floor(ty)===y) throw new ConvexError("Move the garden furniture off this tile first.");
+      if(item.tileX===undefined) await ctx.db.patch(item._id,{tileX:tx,tileY:ty});
+    }
+    if(plot.length>=MAX_TILES&&!conversion) throw new ConvexError("Your plot is fully built.");
+    if(!Number.isInteger(x)||!Number.isInteger(y)||!availableTiles(area==="room"?tiles:plot).some(t=>t.x===x&&t.y===y)) throw new ConvexError("Choose an empty tile beside your existing floor.");
     const price=tilePrice(purchases),user=await ctx.db.get(userId);
     if(!user||(user.coins??0)<price) throw new ConvexError("Not enough coins for this tile.");
     await ctx.db.patch(userId,{coins:(user.coins??0)-price});
-    const update={tiles:[...tiles,{x,y}],tilePurchases:purchases+1};
+    const update={tiles:area==="room"?[...tiles,{x,y}]:tiles,gardenTiles:area==="garden"?[...garden,{x,y}]:garden.filter(t=>t.x!==x||t.y!==y),tilePurchases:purchases+1,gardenPurchases:(room?.gardenPurchases??0)+(area==="garden"?1:0)};
     if(room) await ctx.db.patch(room._id,update);else await ctx.db.insert("rooms",{roomKey,...update});
     return price;
   },

@@ -1,4 +1,33 @@
 .room-workspace { width:100%; }
+.home-main { max-width:1320px; }
+.home-play-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:14px; align-items:start; }
+.home-play-layout .room-workspace { min-width:0; }
+.home-play-layout .estate-world { aspect-ratio:1.12; }
+.home-play-layout .room-house { width:100%!important; }
+.home-play-layout .room-multi-pets { display:grid; gap:10px; margin:0; }
+.home-play-layout .room-pet-card { padding:12px; }
+.pet-home-embedded { gap:9px!important; position:relative; }
+.pet-home-embedded h1 { font-size:21px; line-height:1.15; }
+.pet-home-embedded .pet-vitals { display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; padding:8px; box-shadow:none; }
+.pet-home-embedded .pet-vitals .h-2\.5 { height:6px; }
+.pet-home-embedded .pet-sound-toggle { align-self:flex-end; margin:0; padding:2px 7px; font-size:10px; }
+.pet-home-embedded .pet-actions button { min-height:44px; padding:7px 5px; gap:2px; }
+.pet-home-embedded .pet-actions button > span:first-child { font-size:19px; }
+.tile-builder.tile-builder-garden polygon { fill:#9ac47788; stroke:#548741; }
+.tile-builder polygon[aria-disabled=true] { cursor:not-allowed; opacity:.4; }
+.room-toolbar-actions { flex-wrap:wrap; }
+@media(min-width:1000px) {
+  .home-play-layout:not(.is-compact) { grid-template-columns:minmax(0,1fr) 350px; }
+  .home-play-layout .room-multi-pets { position:sticky; top:122px; max-height:calc(100dvh - 138px); overflow:auto; scrollbar-width:thin; }
+  .home-play-layout .estate-world { max-width:calc((100dvh - 235px)*1.12); margin:0 auto; }
+}
+@media(max-width:600px) {
+  .home-play-layout { gap:6px; }
+  .home-play-layout .estate-world { max-height:36dvh; max-width:40dvh; margin:auto; }
+  .home-play-layout .home-upgrade { padding:5px 8px; }
+  .home-play-layout .room-toolbar { gap:5px; padding:5px 0; }
+  .home-play-layout .room-toolbar strong { font-size:12px; }
+}
 .tile-builder { position:absolute; inset:0; width:100%; height:100%; overflow:visible; z-index:250; pointer-events:none; }
 .tile-builder polygon { pointer-events:all; fill:#e6c67c66; stroke:#9b7842; stroke-width:.35; stroke-dasharray:1 .5; cursor:pointer; }
 .tile-builder polygon:hover,.tile-builder polygon:focus-visible,.tile-builder polygon[aria-pressed=true] { fill:#91c59bbb; stroke:#346c44; outline:none; }

@@ -145,6 +145,8 @@ export default defineSchema({
     roomKey: v.string(),
     tiles:v.optional(v.array(v.object({x:v.number(),y:v.number()}))),
     tilePurchases:v.optional(v.number()),
+    gardenTiles:v.optional(v.array(v.object({x:v.number(),y:v.number()}))),
+    gardenPurchases:v.optional(v.number()),
     level: v.optional(v.number()),
     wallpaperId: v.optional(v.string()),
     floorId: v.optional(v.string()),

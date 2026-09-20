@@ -51,7 +51,7 @@ export function PetHomePage({ pet, embedded = false, roomIndex = 0, roomPetCount
         Sound {sound ? "on" : "off"}
       </button>
 
-      <div className="flex flex-col gap-3 rounded-cozy bg-white/70 p-4 shadow-sm">
+      <div className="pet-vitals flex flex-col gap-3 rounded-cozy bg-white/70 p-4 shadow-sm">
         <StatBar label="Hunger" value={vitals.hunger} icon="🍖" colorVar="var(--color-stat-hunger)" />
         <StatBar label="Cleanliness" value={vitals.cleanliness} icon="🧼" colorVar="var(--color-stat-clean)" />
         <StatBar label="Happiness" value={vitals.happiness} icon="💖" colorVar="var(--color-stat-happy)" />

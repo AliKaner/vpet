@@ -43,6 +43,29 @@ test("legacy furniture stays in place and can move onto a bought tile, never emp
   expect((await a.query(api.decor.getMyRoom)).placements[0]).toMatchObject({tileX:4.5,tileY:1.5,flipped:true});
   await expect(a.mutation(api.decor.moveItem,{itemId:"furniture_sofa",x:137.5,y:37.5,flipped:false,grid:true})).rejects.toThrow("Buy this floor");
 });
+test("garden and house purchases persist separate ground and protect occupied grass",async()=>{
+  const {a}=await setup();
+  await a.mutation(api.decor.placeItem,{itemId:"furniture_sofa",area:"garden"});
+  const initial=await a.query(api.decor.getMyRoom);
+  const furniture=initial.placements[0],x=Math.floor(furniture.tileX!),y=Math.floor(furniture.tileY!);
+  await expect(a.mutation(api.decor.buyTile,{x,y,area:"room",expectedPurchases:0})).rejects.toThrow("Move the garden");
+  expect((await a.query(api.users.getMyProfile)).coins).toBe(1000);
+  await expect(a.mutation(api.decor.moveItem,{itemId:"furniture_sofa",x:37.5,y:37.5,flipped:false,grid:true})).rejects.toThrow("Buy this floor");
+  await a.mutation(api.decor.buyTile,{x:-1,y:0,area:"garden",expectedPurchases:0});
+  const grown=await a.query(api.decor.getMyRoom);
+  expect(grown.gardenTiles).toContainEqual({x:-1,y:0});
+  expect(grown.tiles).toEqual(initial.tiles);
+  expect(grown.placements).toEqual(initial.placements);
+  await a.mutation(api.decor.moveItem,{itemId:"furniture_sofa",x:-12.5,y:12.5,flipped:false,grid:true});
+  await a.mutation(api.decor.buyTile,{x,y,area:"room",expectedPurchases:1});
+  const converted=await a.query(api.decor.getMyRoom);
+  expect(converted.tiles).toContainEqual({x,y});
+  expect(converted.gardenTiles).not.toContainEqual({x,y});
+  expect(converted.gardenPurchases).toBe(1);
+  await expect(a.mutation(api.decor.buyTile,{x:-1,y:0,area:"garden",expectedPurchases:2})).rejects.toThrow();
+  expect((await a.query(api.users.getMyProfile)).coins).toBe(760);
+});
+
 test("camera fits irregular floors and round-trips coordinates at a shared scale",()=>{
   const base=roomGeometry(BASE_TILES);
   expect(base.project(0,0)).toEqual({left:50,top:42});

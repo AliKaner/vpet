@@ -19,7 +19,7 @@ export function NavBar() {
       className="sticky top-0 z-10 border-b border-cream-dark bg-cream/90 backdrop-blur"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-2 px-4 py-3">
+      <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-2 px-4 py-2">
         <div className="flex items-center gap-2">
           <span className="shrink-0 font-display text-lg font-extrabold text-cocoa">Vpet</span>
           {profile !== undefined && (
@@ -36,7 +36,7 @@ export function NavBar() {
             Sign out
           </button>
         </div>
-        <nav className="flex flex-wrap items-center gap-1">
+        <nav className="hidden items-center gap-1 overflow-x-auto sm:flex" aria-label="Main navigation">
           <NavLink to="/" end className={linkClass}>
             My Room
           </NavLink>

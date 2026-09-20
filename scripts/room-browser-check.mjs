@@ -79,17 +79,29 @@ await evaluate('new Promise(r=>setTimeout(r,400))');
 await writeFile('node_modules/.tmp/room-garden-mobile.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
 const petWidthBefore=await evaluate(`parseFloat(document.querySelector('.world-pet').style.width)`);
 await click('Build tiles');
-for(const [index,coords] of ['4, 1','5, 1','4, 2'].entries()) {
-  await evaluate(`document.querySelector('[aria-label="Add tile ${coords}"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))`);
+for(const coords of ['4, 1','5, 1','4, 2']) {
+  await evaluate(`document.querySelector('[aria-label="Buy room tile ${coords}"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))`);
   await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');
-  await click(`Buy selected tile · ${[100,140,190][index]} coins`);
+
 }
-assert.ok(await evaluate(`parseFloat(document.querySelector('.world-pet').style.width)`)<petWidthBefore);
+assert.ok(await evaluate(`parseFloat(document.querySelector('.world-pet').style.width)`)<=petWidthBefore);
 assert.equal(await evaluate(`document.documentElement.scrollWidth>innerWidth`),false);
+assert.equal(await evaluate(`document.querySelectorAll('[data-tile-area="room"]').length`),19);
+const grassBefore=await evaluate(`document.querySelectorAll('[data-tile-area="garden"]').length`);
+await click('Garden grass');
+await evaluate(`document.querySelector('[aria-label="Buy garden tile 5, 2"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))`);
+await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');
+assert.equal(await evaluate(`document.querySelectorAll('[data-tile-area="garden"]').length`),grassBefore+1);
+assert.equal(await evaluate(`document.querySelectorAll('.estate-garden').length`),0);
 await click('Finish building');
 await writeFile('node_modules/.tmp/room-tiles-mobile.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
 await send('Emulation.setDeviceMetricsOverride',{width:1050,height:1100,deviceScaleFactor:1,mobile:false});
 await writeFile('node_modules/.tmp/room-tiles-desktop.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
+await send('Emulation.setDeviceMetricsOverride',{width:1366,height:768,deviceScaleFactor:1,mobile:false});
+await evaluate('window.scrollTo(0,0)');
+await evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');
+assert.ok(await evaluate(`[...document.querySelectorAll('.pet-actions')].every(e=>e.getBoundingClientRect().bottom<innerHeight)`),'pet actions must fit on desktop');
+await writeFile('node_modules/.tmp/room-compact-desktop.png',Buffer.from((await send('Page.captureScreenshot',{format:'png'})).data,'base64'));
 for(const price of [180,350,600,950]) await click(`Expand home · ${price} coins`);
 assert.equal(await evaluate(`document.querySelector('.estate-world').dataset.homeModel`),'Grand estate');
 assert.equal(await evaluate(`document.querySelector('.room-house').style.width`),'100%');

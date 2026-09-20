@@ -11,6 +11,7 @@ import { CharacterPage } from "./pages/CharacterPage";
 import { FriendsPage } from "./pages/FriendsPage";
 import { GraveyardPage } from "./pages/GraveyardPage";
 import { LoginPage } from "./pages/LoginPage";
+import { MorePage } from "./pages/MorePage";
 import { PetCreatePage } from "./pages/PetCreatePage";
 import { PetHomePage } from "./pages/PetHomePage";
 import { PartnerPage } from "./pages/PartnerPage";
@@ -100,6 +101,7 @@ export default function App() {
             <Route path="/friends" element={<FriendsPage />} />
             <Route path="/partner" element={<PartnerPage />} />
             <Route path="/graveyard" element={<GraveyardPage />} />
+            <Route path="/more" element={<MorePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AppShell>

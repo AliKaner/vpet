@@ -3,6 +3,7 @@ export const BASE_TILES:RoomTile[]=Array.from({length:16},(_,i)=>({x:i%4,y:Math.
 export const MAX_TILES=80;
 export const tileKey=({x,y}:RoomTile)=>`${x},${y}`;
 export const tilePrice=(purchased:number)=>Math.min(1_000_000_000,Math.ceil(100*Math.pow(1.35,purchased)/10)*10);
+export const defaultGardenTiles=(home:RoomTile[])=>availableTiles(home).filter(t=>t.x>=4||t.y>=4);
 export function availableTiles(tiles:RoomTile[]) {
   const occupied=new Set(tiles.map(tileKey)),candidates=new Map<string,RoomTile>();
   for(const tile of tiles) for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {

@@ -49,7 +49,7 @@ export function RoomControls({onPlaced}:{onPlaced?:(itemId?:string)=>void}={}) {
     <ThemeFilter value={theme} onChange={value=>{setTheme(value);setCollection("all");}} />
     <FurnitureSetFilter value={collection} onChange={value=>{setCollection(value);setTheme("all");}} />
     <div className="room-theme-filter" role="group" aria-label="Placement area"><button type="button" aria-pressed={area==="room"} onClick={()=>setArea("room")}>Inside</button><button type="button" aria-pressed={area==="garden"} onClick={()=>setArea("garden")}>Garden</button></div>
-    <p className="text-xs text-cocoa-soft">{count}/{area==="room"?limits.indoor+room.tilePurchases*2:limits.garden} spaces used · Add floor tiles or expand your home for more space.</p>
+    <p className="text-xs text-cocoa-soft">{count}/{area==="room"?limits.indoor+(room.tilePurchases-room.gardenPurchases)*2:limits.garden+room.gardenPurchases*2} spaces used · Add floor tiles or grass for more space.</p>
     <Link to="/shop" onClick={()=>onPlaced?.()} className="text-sm font-bold text-peach-dark">Shop more furniture →</Link>
     {groups.filter(g=>area==="room" || g.kind==="furniture").map(({ kind, label }) => <div key={kind} className="room-control-group"><h3>{label}</h3><div className="room-control-items">
       {kind === "wallpaper" && <button type="button" className={!room.wallpaperId ? "selected" : ""} onClick={() => void choose("wallpaper", null)}>Default</button>}
