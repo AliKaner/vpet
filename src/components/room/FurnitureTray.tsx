@@ -86,13 +86,20 @@ export function FurnitureTray({ area, onAreaChange, onSelect, onOpenMore, onClos
               type="button"
               disabled={busy === item.id}
               aria-pressed={selected}
+              aria-label={selected ? `Remove ${item.label} from the room` : `Place ${item.label} in the room`}
               onClick={() => void toggle(item)}
               className={`furniture-tray-item ${selected ? "is-placed" : ""}`}
             >
+              {selected && (
+                <span className="furniture-tray-remove" aria-hidden>
+                  {"✕"}
+                </span>
+              )}
               <span className="furniture-tray-icon">
                 <FurnitureArt id={item.id} />
               </span>
               <span className="furniture-tray-label">{item.label}</span>
+              <span className="furniture-tray-status">{selected ? "Tap to remove" : "Tap to place"}</span>
             </button>
           );
         })}

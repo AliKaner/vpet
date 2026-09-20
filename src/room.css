@@ -96,11 +96,14 @@
 .furniture-tray-more { padding:7px 12px; border-radius:14px; background:#ede4d8; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; }
 .furniture-tray-header-actions > button[aria-label] { width:30px; height:30px; border-radius:50%; background:#ede4d8; cursor:pointer; }
 .furniture-tray-scroll { display:flex; gap:8px; overflow-x:auto; padding:2px 6px 4px; scroll-snap-type:x proximity; }
-.furniture-tray-item { flex:0 0 auto; scroll-snap-align:start; display:flex; flex-direction:column; align-items:center; gap:4px; width:72px; padding:8px 4px; border-radius:16px; background:#fff9f0; border:2px solid transparent; cursor:pointer; }
+.furniture-tray-item { position:relative; flex:0 0 auto; scroll-snap-align:start; display:flex; flex-direction:column; align-items:center; gap:2px; width:76px; padding:8px 4px; border-radius:16px; background:#fff9f0; border:2px solid transparent; cursor:pointer; }
 .furniture-tray-item.is-placed { background:#fdeee0; border-color:#f2a154; }
+.furniture-tray-remove { position:absolute; top:-6px; right:-6px; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#e0708a; color:#fff; font-size:11px; font-weight:800; box-shadow:0 2px 6px #30243533; }
 .furniture-tray-icon { display:block; width:44px; }
 .furniture-tray-icon .furniture-art,.furniture-tray-icon .furniture-pixel-art { width:100%; }
 .furniture-tray-label { font-size:10px; font-weight:800; text-align:center; line-height:1.15; color:#5b4638; }
+.furniture-tray-status { font-size:9px; font-weight:700; text-align:center; color:#a98d78; }
+.furniture-tray-item.is-placed .furniture-tray-status { color:#c06a3a; }
 .furniture-tray-empty { padding:10px 6px; font-size:12px; color:#8a7266; }
 .furniture-tray-error { padding:4px 6px 0; font-size:11px; font-weight:800; color:#b4556d; }
 .room-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; padding:8px 4px; }
