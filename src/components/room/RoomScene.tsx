@@ -12,6 +12,7 @@ import { TileBuilder } from "./TileBuilder";
 import { ConvexError } from "convex/values";
 import { DecorationDialog } from "./DecorationDialog";
 import { RoomControls } from "./RoomControls";
+import { FurnitureTray } from "./FurnitureTray";
 import { HOME_LEVELS,homeLevel } from "../../../convex/lib/homeLevels";
 import type { Character } from "../../../convex/lib/character";
 const wallItem = isWallFurniture;
@@ -42,6 +43,7 @@ export function RoomSceneView({ room, character, move, remove, children, compact
   const [editing, setEditing] = useState(false);
   const [pickerOpen,setPickerOpen]=useState(false);
   const [building,setBuilding]=useState(false),[buildArea,setBuildArea]=useState<"room"|"garden">("room");
+  const [trayArea,setTrayArea]=useState<"room"|"garden">("room");
   const purchaseLock=useRef(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [draft, setDraft] = useState<Record<string, Position>>({});
@@ -90,7 +92,7 @@ export function RoomSceneView({ room, character, move, remove, children, compact
   }
   return <RoomGeometry.Provider value={g}><RoomWorld.Provider value={world}>
     <div className={`home-play-layout ${compact?"is-compact":""}`}><section className="room-workspace">
-      <div className="room-toolbar"><div><strong>{level.label} · Lv. {level.level}</strong><p>{editing ? "Drag furniture · arrow keys to move · flip to change direction" : `${indoor.length}/${indoorCapacity} inside · ${garden.length}/${gardenCapacity} garden spaces · ${tiles.length} tiles`}</p></div><div className="room-toolbar-actions">{onBuyTile&&<button aria-pressed={building} onClick={()=>{setBuilding(!building);setEditing(false);}}>{building?"Finish building":"Build tiles"}</button>}{editing && <button onClick={()=>setPickerOpen(true)}>Choose furniture</button>}<button onClick={() => {setBuilding(false);setEditing(!editing);setSelected(null);if(!editing)setPickerOpen(true);}} aria-pressed={editing}>{editing ? "Done" : "Decorate"}</button></div></div>
+      <div className="room-toolbar"><div><strong>{level.label} · Lv. {level.level}</strong><p>{editing ? "Drag furniture · arrow keys to move · flip to change direction" : `${indoor.length}/${indoorCapacity} inside · ${garden.length}/${gardenCapacity} garden spaces · ${tiles.length} tiles`}</p></div><div className="room-toolbar-actions">{onBuyTile&&<button aria-pressed={building} onClick={()=>{setBuilding(!building);setEditing(false);}}>{building?"Finish building":"Build tiles"}</button>}<button onClick={() => {setBuilding(false);setEditing(!editing);setSelected(null);}} aria-pressed={editing}>{editing ? "Done" : "Decorate"}</button></div></div>
       {building&&<div className="tile-build-controls"><div className="room-theme-filter"><button aria-pressed={buildArea==="room"} onClick={()=>setBuildArea("room")}>House floor</button><button aria-pressed={buildArea==="garden"} onClick={()=>setBuildArea("garden")}>Garden grass</button></div><strong>{price.toLocaleString()} coins per tile · {tiles.length+gardenTiles.length}/{MAX_TILES}</strong><p>Click an outlined tile to buy immediately. House mode also converts grass into floor. Prices increase after each purchase.</p>{coins<price&&<p>Need {(price-coins).toLocaleString()} more coins.</p>}</div>}
       {next && onUpgrade && <div className="home-upgrade"><span>Next: {next.indoor} indoor + {next.garden} garden spaces</span><button disabled={saving || coins<next.price} onClick={async()=>{setSaving(true);setError("");try{await onUpgrade();}catch{setError("Couldn't expand your home. Check your coins and current level.");}finally{setSaving(false);}}}>Expand home · {next.price} coins</button></div>}
       <div className={`estate-world estate-level-${level.level}`} data-home-model={level.label}>
@@ -124,6 +126,7 @@ export function RoomSceneView({ room, character, move, remove, children, compact
       </div>
       {editing && selected && <div className="room-toolbar"><strong>{getShopItem(selected)?.label}</strong><button disabled={saving} onClick={() => { const pos = position(selected,placements.findIndex(p => p.itemId === selected)); void persist(selected,{ ...pos,flipped:!pos.flipped }); }}>Flip direction</button><button disabled={saving} onClick={async () => { setSaving(true); try { await remove({ itemId:selected }); setSelected(null); } catch { setError("Couldn't remove this item."); } finally { setSaving(false); } }}>Put away</button></div>}
       {error && <p role="alert">{error}</p>}{saving && <p role="status">Saving layout…</p>}
+      {editing && <FurnitureTray area={trayArea} onAreaChange={setTrayArea} onSelect={setSelected} onOpenMore={()=>setPickerOpen(true)} onClose={()=>{setEditing(false);setSelected(null);}} />}
       <DecorationDialog open={pickerOpen} onClose={()=>setPickerOpen(false)}>{picker?.((itemId)=>{setPickerOpen(false);if(itemId)setSelected(itemId);}) ?? <p>Choose a collection above to preview its furniture.</p>}</DecorationDialog>
     </section>
     {!compact && children}</div>
